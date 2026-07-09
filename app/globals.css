@@ -1,0 +1,52 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&family=Montserrat:wght@700;800;900&family=Cormorant+Garamond:wght@500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sans: "Inter";
+    --font-serif: "Playfair Display";
+
+    /* Dark mode por defecto: estética cristiana elegante (azul noche + oro) */
+    --background: 228 34% 5%;
+    --foreground: 40 25% 94%;
+    --card: 228 28% 8%;
+    --card-foreground: 40 25% 94%;
+    --popover: 228 28% 8%;
+    --popover-foreground: 40 25% 94%;
+    --primary: 43 62% 52%;
+    --primary-foreground: 228 34% 6%;
+    --secondary: 228 20% 14%;
+    --secondary-foreground: 40 25% 94%;
+    --muted: 228 20% 13%;
+    --muted-foreground: 228 12% 62%;
+    --accent: 228 20% 16%;
+    --accent-foreground: 40 25% 94%;
+    --destructive: 0 62% 42%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 228 18% 17%;
+    --input: 228 18% 20%;
+    --ring: 43 62% 52%;
+    --radius: 0.75rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, hsl(43 62% 52% / 0.07), transparent),
+      radial-gradient(ellipse 60% 40% at 90% 110%, hsl(228 60% 30% / 0.15), transparent);
+    background-attachment: fixed;
+  }
+}
+
+@layer utilities {
+  .text-gold-gradient {
+    @apply bg-gradient-to-r from-gold-light via-gold to-gold-dark bg-clip-text text-transparent;
+  }
+}
