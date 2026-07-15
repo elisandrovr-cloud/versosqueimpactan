@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 // Máximo permitido por el plan Hobby de Vercel (300s). Videos de hasta
 // ~60s renderizan dentro del límite; para 90s garantizados usa
 // Remotion Lambda o un host sin límite (Railway/Render) — ver README.
-export const maxDuration = 300;
+export const maxDuration = 290;
 
 /**
  * Render final en MP4 (H.264, 1080x1920) con Remotion en el servidor.
