@@ -6,10 +6,12 @@ import { FPS } from "@/lib/constants";
 import type { VideoProject } from "@/lib/types";
 
 export const runtime = "nodejs";
-// Máximo permitido por el plan Hobby de Vercel (300s). Videos de hasta
-// ~60s renderizan dentro del límite; para 90s garantizados usa
-// Remotion Lambda o un host sin límite (Railway/Render) — ver README.
-export const maxDuration = 290;
+// Límite seguro para el plan Hobby de Vercel (máximo permitido: 300s).
+// El render real de video en servidor no funciona en Vercel serverless
+// (Chrome headless + Remotion superan el límite de tamaño). Para descargar
+// videos usa un host sin esas restricciones (Railway/Render) o Remotion
+// Lambda — ver README, sección "Render y descarga".
+export const maxDuration = 60;
 
 /**
  * Render final en MP4 (H.264, 1080x1920) con Remotion en el servidor.

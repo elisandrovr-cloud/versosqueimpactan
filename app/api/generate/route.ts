@@ -5,7 +5,8 @@ import type { GenerateRequest } from "@/lib/types";
 
 export const runtime = "nodejs";
 // El pipeline completo (guion + voz + fondo + lip sync) puede tardar.
-export const maxDuration = 300;
+// 60s es válido en el plan Hobby de Vercel (máximo permitido: 300s).
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   let body: GenerateRequest;
