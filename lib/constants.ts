@@ -89,29 +89,42 @@ export const TEXT_STYLES: {
 ];
 
 /**
- * Voces masculinas recomendadas de ElevenLabs (español latino, cálidas).
- * Los IDs son voces públicas de la Voice Library — verifica disponibilidad
- * en tu cuenta y reemplaza por tus favoritas.
+ * Voces masculinas en español latino. Por defecto usan Microsoft Edge TTS
+ * (neuronal, GRATIS y sin clave). Si configuras ELEVENLABS_API_KEY, la app
+ * usa automáticamente la voz equivalente de ElevenLabs (aún más realista).
+ *  - `edge`: nombre de la voz neuronal gratuita.
+ *  - `eleven`: ID de la voz equivalente en ElevenLabs (opcional, de pago).
  */
 export const VOICES = [
   {
-    id: "onwK4e9ZLuTAKqWW03F9",
-    label: "Daniel — profunda y serena",
+    id: "jorge",
+    label: "Jorge — cálida y profunda (México)",
     description: "Narrador cálido, ideal para reflexiones",
+    edge: "es-MX-JorgeNeural",
+    eleven: "onwK4e9ZLuTAKqWW03F9",
   },
   {
-    id: "TX3LPaxmHKxFdv7VOQHJ",
-    label: "Liam — joven y cercana",
+    id: "alonso",
+    label: "Alonso — cercana y clara (Latino US)",
     description: "Tono conversacional y emotivo",
+    edge: "es-US-AlonsoNeural",
+    eleven: "TX3LPaxmHKxFdv7VOQHJ",
   },
   {
-    id: "pqHfZKP75CvOlQylNhV4",
-    label: "Bill — madura y pastoral",
+    id: "gonzalo",
+    label: "Gonzalo — serena y pastoral (Colombia)",
     description: "Voz grave con autoridad amorosa",
+    edge: "es-CO-GonzaloNeural",
+    eleven: "pqHfZKP75CvOlQylNhV4",
   },
 ] as const;
 
 export const DEFAULT_VOICE_ID = VOICES[0].id;
+
+/** Resuelve una voz lógica ("jorge") a sus nombres por proveedor. */
+export function resolveVoice(voiceId: string) {
+  return VOICES.find((v) => v.id === voiceId) ?? VOICES[0];
+}
 
 /** Redes sociales para la marca de agua. */
 export const SOCIAL_NETWORKS = [

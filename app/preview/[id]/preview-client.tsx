@@ -102,9 +102,9 @@ export function PreviewClient({ id }: { id: string }) {
           {project.demo && (
             <p className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-relaxed text-amber-200/90">
               <Info className="mt-0.5 h-4 w-4 shrink-0" />
-              Estás en modo demo: sin claves de API la voz no se genera y el
-              fondo es un cielo animado. Configura tus claves en .env.local
-              (ver README) para voz realista, paisajes reales y lip sync.
+              No se pudo generar la voz en este momento (el servicio gratuito no
+              respondió). El video se creó con los tiempos estimados. Vuelve a
+              generar en unos segundos o agrega una clave de voz en .env.local.
             </p>
           )}
         </div>

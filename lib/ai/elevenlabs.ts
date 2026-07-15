@@ -1,11 +1,15 @@
 import type { WordTiming } from "../types";
-import { estimateWordTimings } from "../utils";
 
 /**
  * Voz en off con ElevenLabs usando el endpoint `with-timestamps`,
  * que devuelve el audio Y la alineación por caracteres. De ahí
  * derivamos timestamps por PALABRA para sincronizar las animaciones
  * de texto con la voz (estilo karaoke de CapCut).
+ *
+ * Esta es la opción PREMIUM (requiere ELEVENLABS_API_KEY). La app funciona
+ * gratis sin ella usando Edge TTS (ver lib/ai/voice.ts). Devuelve null si
+ * no hay clave o si la llamada falla, para que el orquestador pruebe la voz
+ * gratuita.
  */
 
 interface ElevenLabsAlignment {
@@ -48,26 +52,17 @@ function alignmentToWordTimings(text: string, a: ElevenLabsAlignment): WordTimin
   return timings;
 }
 
-export async function generateVoice(opts: {
-  text: string;
-  voiceId: string;
-  durationSec: number;
-}): Promise<VoiceResult> {
-  const { text, voiceId, durationSec } = opts;
+/** Devuelve null si no hay clave o si la llamada falla. */
+export async function elevenLabsTTS(
+  text: string,
+  elevenVoiceId: string
+): Promise<VoiceResult | null> {
   const apiKey = process.env.ELEVENLABS_API_KEY;
-
-  if (!apiKey) {
-    // Modo demo: sin audio, timestamps estimados por longitud de palabra.
-    return {
-      audioDurationSec: durationSec,
-      wordTimings: estimateWordTimings(text, durationSec),
-      demo: true,
-    };
-  }
+  if (!apiKey) return null;
 
   try {
     const res = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/with-timestamps?output_format=mp3_44100_128`,
+      `https://api.elevenlabs.io/v1/text-to-speech/${elevenVoiceId}/with-timestamps?output_format=mp3_44100_128`,
       {
         method: "POST",
         headers: {
@@ -98,7 +93,7 @@ export async function generateVoice(opts: {
 
     const wordTimings = alignmentToWordTimings(text, data.alignment);
     const audioDurationSec =
-      data.alignment.character_end_times_seconds.at(-1) ?? durationSec;
+      data.alignment.character_end_times_seconds.at(-1) ?? 0;
 
     return {
       audioDataUrl: `data:audio/mpeg;base64,${data.audio_base64}`,
@@ -107,11 +102,7 @@ export async function generateVoice(opts: {
       demo: false,
     };
   } catch (err) {
-    console.error("[elevenlabs] fallo TTS, usando timings estimados:", err);
-    return {
-      audioDurationSec: durationSec,
-      wordTimings: estimateWordTimings(text, durationSec),
-      demo: true,
-    };
+    console.error("[elevenlabs] fallo TTS:", err);
+    return null;
   }
 }

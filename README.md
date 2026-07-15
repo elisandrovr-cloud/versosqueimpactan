@@ -106,7 +106,18 @@ npm run dev
 2. Pégala en `.env.local`.
 3. Claude elige el versículo perfecto para el tema, redacta una reflexión pastoral y **calibra el número de palabras exactamente a la duración elegida** (a ~2.1 palabras/segundo de narración pausada).
 
-### 2. ElevenLabs (voz realista) — `ELEVENLABS_API_KEY` + `ELEVENLABS_VOICE_ID` ⭐ la más importante
+### ⭐ Voz GRATIS y sin clave (por defecto) — Microsoft Edge TTS
+
+**No necesitas configurar nada para tener voz realista.** La app usa por
+defecto las voces neuronales de Microsoft (las mismas de Azure, vía el canal
+gratuito de "Leer en voz alta" de Edge): `es-MX-JorgeNeural`, `es-US-AlonsoNeural`
+y `es-CO-GonzaloNeural` — voces masculinas cálidas en español latino. Además
+devuelven los tiempos por palabra, así que los subtítulos karaoke quedan
+sincronizados sin trabajo extra. Si Edge no está disponible, la app recurre a
+Google Translate TTS (también gratis y sin clave). Todo esto vive en
+`lib/ai/free-tts.ts` y `lib/ai/voice.ts`, sin requerir cuenta ni tarjeta.
+
+### 2. ElevenLabs (voz premium, OPCIONAL) — `ELEVENLABS_API_KEY`
 
 1. Cuenta en [elevenlabs.io](https://elevenlabs.io) (el plan Starter de $5/mes alcanza para empezar; el Creator de $22/mes da ~100 min de audio).
 2. **Profile → API Keys** → copia tu clave.

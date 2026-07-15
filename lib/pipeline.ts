@@ -1,6 +1,6 @@
 import type { GenerateRequest, VideoProject } from "./types";
 import { generateScript } from "./ai/anthropic";
-import { generateVoice } from "./ai/elevenlabs";
+import { generateVoice } from "./ai/voice";
 import { findBackground } from "./ai/pexels";
 import { generateLipSync } from "./ai/did";
 import { uploadAudioDataUrl } from "./supabase/server";
@@ -25,7 +25,7 @@ export async function runGenerationPipeline(
   const seed = req.variationSeed ?? Math.floor(Math.random() * 1e9);
 
   // 1. Guion
-  const { script, demo: scriptDemo } = await generateScript({
+  const { script } = await generateScript({
     topic: req.topic,
     customMessage: req.customMessage,
     manualVerse: req.manualVerse,
@@ -82,7 +82,9 @@ export async function runGenerationPipeline(
     backgroundQuery: req.backgroundQuery,
     includeAvatar: req.includeAvatar,
     watermark: req.watermark,
-    demo: scriptDemo || voice.demo,
+    // El guion del banco curado son versículos reales y válidos; solo es
+    // "demo" si NO se pudo generar audio real (ni gratis ni de pago).
+    demo: voice.demo,
     assets: {
       audioUrl,
       audioDurationSec: voice.audioDurationSec,
