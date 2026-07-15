@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { useProjectStore } from "@/lib/store";
+import { deleteAudio } from "@/lib/audio-store";
 import { formatDate, formatDuration } from "@/lib/utils";
 
 export function VideoGallery() {
@@ -95,7 +96,10 @@ export function VideoGallery() {
               size="sm"
               variant="ghost"
               className="text-muted-foreground hover:text-red-400"
-              onClick={() => removeProject(p.id)}
+              onClick={() => {
+                removeProject(p.id);
+                void deleteAudio(p.id);
+              }}
             >
               <Trash2 className="h-4 w-4" />
             </Button>

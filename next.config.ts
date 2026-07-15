@@ -18,6 +18,13 @@ const nextConfig: NextConfig = {
     // Las respuestas de render de video pueden ser grandes.
     serverActions: { bodySizeLimit: "10mb" },
   },
+  async redirects() {
+    return [
+      // La portada también responde en /index y /index.html.
+      { source: "/index", destination: "/", permanent: true },
+      { source: "/index.html", destination: "/", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -24,13 +24,14 @@ export async function runGenerationPipeline(
   const id = generateId();
   const seed = req.variationSeed ?? Math.floor(Math.random() * 1e9);
 
-  // 1. Guion
+  // 1. 🖋️ Agente Guionista
   const { script } = await generateScript({
     topic: req.topic,
     customMessage: req.customMessage,
     manualVerse: req.manualVerse,
     manualReference: req.manualReference,
     durationSec: req.durationSec,
+    contentStyle: req.contentStyle,
     seed,
   });
 
@@ -78,6 +79,7 @@ export async function runGenerationPipeline(
     durationSec,
     script,
     voiceId: req.voiceId,
+    contentStyle: req.contentStyle ?? "versiculo",
     textStyle: req.textStyle,
     backgroundQuery: req.backgroundQuery,
     includeAvatar: req.includeAvatar,
@@ -88,6 +90,7 @@ export async function runGenerationPipeline(
     assets: {
       audioUrl,
       audioDurationSec: voice.audioDurationSec,
+      voiceProvider: voice.provider,
       wordTimings: voice.wordTimings,
       backgroundVideoUrl: background.videoUrl,
       backgroundPosterUrl: background.posterUrl,

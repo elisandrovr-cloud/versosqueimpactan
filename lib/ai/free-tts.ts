@@ -51,21 +51,26 @@ function escapeSsml(text: string): string {
 }
 
 /**
- * Genera voz con Edge TTS vía WebSocket. Devuelve null si falla (para que
- * el orquestador pruebe el siguiente proveedor).
+ * Genera voz con Edge TTS vía WebSocket usando la librería `ws`, que SÍ
+ * permite enviar las cabeceras (User-Agent y Origin) que Microsoft exige —
+ * el WebSocket nativo de Node las ignoraba y la conexión era rechazada.
+ * Devuelve null si falla (el orquestador prueba el siguiente proveedor).
  */
 export async function edgeTTS(
   text: string,
   voice: string,
   timeoutMs = 25000
 ): Promise<FreeVoiceResult | null> {
+  const { default: WS } = await import("ws");
+
   return new Promise((resolve) => {
     let settled = false;
+    let ws: InstanceType<typeof WS> | null = null;
     const finish = (v: FreeVoiceResult | null) => {
       if (settled) return;
       settled = true;
       try {
-        ws.close();
+        ws?.close();
       } catch {
         /* noop */
       }
@@ -78,30 +83,30 @@ export async function edgeTTS(
       `&Sec-MS-GEC-Version=1-131.0.2903.86` +
       `&ConnectionId=${crypto.randomUUID().replace(/-/g, "")}`;
 
-    let ws: WebSocket;
     try {
-      // El segundo argumento con headers es soportado por el WebSocket de
-      // undici (Node 20+); si se ignora, la autenticación va en la query.
-      ws = new WebSocket(url, {
+      ws = new WS(url, {
         headers: {
           "User-Agent":
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
           Origin: "chrome-extension://jdiccldimpstbiikmalgdeniogfadeok",
+          Pragma: "no-cache",
+          "Cache-Control": "no-cache",
+          "Accept-Encoding": "gzip, deflate, br",
+          "Accept-Language": "es-MX,es;q=0.9",
         },
-      } as unknown as string);
+      });
     } catch {
       return finish(null);
     }
-    ws.binaryType = "arraybuffer";
 
-    const audioChunks: Uint8Array[] = [];
+    const audioChunks: Buffer[] = [];
     const timings: WordTiming[] = [];
     const timer = setTimeout(() => finish(null), timeoutMs);
 
-    ws.onopen = () => {
+    ws.on("open", () => {
       const now = new Date().toISOString();
       // 1) configuración de salida (mp3 + límites de palabra)
-      ws.send(
+      ws!.send(
         `X-Timestamp:${now}\r\nContent-Type:application/json; charset=utf-8\r\n` +
           `Path:speech.config\r\n\r\n` +
           `{"context":{"synthesis":{"audio":{"metadataoptions":{"sentenceBoundaryEnabled":"false","wordBoundaryEnabled":"true"},"outputFormat":"audio-24khz-48kbitrate-mono-mp3"}}}}`
@@ -110,17 +115,18 @@ export async function edgeTTS(
       const ssml =
         `<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='es-MX'>` +
         `<voice name='${voice}'><prosody rate='-8%' pitch='-2%'>${escapeSsml(text)}</prosody></voice></speak>`;
-      ws.send(
+      ws!.send(
         `X-RequestId:${crypto.randomUUID().replace(/-/g, "")}\r\n` +
           `Content-Type:application/ssml+xml\r\nX-Timestamp:${now}\r\nPath:ssml\r\n\r\n${ssml}`
       );
-    };
+    });
 
-    ws.onmessage = (ev: MessageEvent) => {
-      if (typeof ev.data === "string") {
-        if (ev.data.includes("Path:audio.metadata")) {
+    ws.on("message", (data: Buffer, isBinary: boolean) => {
+      if (!isBinary) {
+        const msg = data.toString("utf8");
+        if (msg.includes("Path:audio.metadata")) {
           try {
-            const json = ev.data.slice(ev.data.indexOf("{"));
+            const json = msg.slice(msg.indexOf("{"));
             const meta = JSON.parse(json) as {
               Metadata: {
                 Type: string;
@@ -140,38 +146,33 @@ export async function edgeTTS(
           } catch {
             /* metadata malformada: ignorar */
           }
-        } else if (ev.data.includes("Path:turn.end")) {
+        } else if (msg.includes("Path:turn.end")) {
           clearTimeout(timer);
           if (audioChunks.length === 0) return finish(null);
-          const total = audioChunks.reduce((a, c) => a + c.length, 0);
-          const buf = new Uint8Array(total);
-          let off = 0;
-          for (const c of audioChunks) {
-            buf.set(c, off);
-            off += c.length;
-          }
-          const b64 = Buffer.from(buf).toString("base64");
+          const buf = Buffer.concat(audioChunks);
           const duration =
             timings.length > 0 ? timings[timings.length - 1].end + 0.4 : 0;
           finish({
-            audioDataUrl: `data:audio/mpeg;base64,${b64}`,
+            audioDataUrl: `data:audio/mpeg;base64,${buf.toString("base64")}`,
             audioDurationSec: duration,
             wordTimings: timings,
           });
         }
       } else {
-        // Mensaje binario: [2 bytes largo de cabecera][cabecera][audio]
-        const view = new DataView(ev.data as ArrayBuffer);
-        const headerLen = view.getUint16(0);
-        audioChunks.push(new Uint8Array(ev.data as ArrayBuffer, 2 + headerLen));
+        // Mensaje binario: [2 bytes largo de cabecera][cabecera][audio mp3]
+        if (data.length < 2) return;
+        const headerLen = data.readUInt16BE(0);
+        if (data.length > 2 + headerLen) {
+          audioChunks.push(data.subarray(2 + headerLen));
+        }
       }
-    };
+    });
 
-    ws.onerror = () => finish(null);
-    ws.onclose = () => {
+    ws.on("error", () => finish(null));
+    ws.on("close", () => {
       clearTimeout(timer);
       if (!settled) finish(null);
-    };
+    });
   });
 }
 

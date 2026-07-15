@@ -6,6 +6,7 @@ import { RefreshCw, Loader2, Mountain, Type, Mic2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useProjectStore } from "@/lib/store";
+import { saveAudio } from "@/lib/audio-store";
 import { BACKGROUNDS, TEXT_STYLES, VOICES } from "@/lib/constants";
 import type { GenerateRequest, VideoProject } from "@/lib/types";
 
@@ -36,6 +37,7 @@ export function RegeneratePanel({ project }: { project: VideoProject }) {
       manualVerse: project.manualVerse,
       manualReference: project.manualReference,
       durationSec: Math.round(project.durationSec / 5) * 5,
+      contentStyle: project.contentStyle,
       voiceId:
         variation === "voz" || variation === "todo"
           ? pickDifferent(VOICES as unknown as { id: string }[], project.voiceId).id
@@ -61,6 +63,9 @@ export function RegeneratePanel({ project }: { project: VideoProject }) {
       });
       if (!res.ok) throw new Error(`Error ${res.status}`);
       const newProject = (await res.json()) as VideoProject;
+      if (newProject.assets.audioUrl?.startsWith("data:")) {
+        await saveAudio(newProject.id, newProject.assets.audioUrl);
+      }
       addProject(newProject);
       router.push(`/preview/${newProject.id}`);
     } finally {

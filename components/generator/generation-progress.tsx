@@ -5,16 +5,16 @@ import { CheckCircle2, Loader2, Circle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 /**
- * Progreso visual mientras el pipeline corre en el servidor.
- * Las etapas avanzan con tiempos estimados; la última espera
- * a que la API responda de verdad.
+ * Progreso visual mientras los agentes trabajan en el servidor.
+ * Cada tarea tiene su agente especializado; las etapas avanzan con
+ * tiempos estimados y la última espera a que la API responda de verdad.
  */
 const STEPS = [
-  { label: "Buscando el versículo perfecto…", estMs: 4000 },
-  { label: "Grabando la voz en off…", estMs: 9000 },
-  { label: "Eligiendo el paisaje cinematográfico…", estMs: 5000 },
-  { label: "Sincronizando labios del avatar…", estMs: 12000 },
-  { label: "Componiendo tu video…", estMs: 6000 },
+  { label: "🖋️ Agente Guionista — escribiendo tu mensaje épico…", estMs: 4000 },
+  { label: "🎙️ Agente de Voz — grabando la voz en off…", estMs: 9000 },
+  { label: "🏞️ Agente Visual — eligiendo el paisaje cinematográfico…", estMs: 5000 },
+  { label: "👄 Agente de Lip Sync — sincronizando los labios…", estMs: 12000 },
+  { label: "🎬 Agente Director — montando tu video…", estMs: 6000 },
 ];
 
 export function GenerationProgress({ includeAvatar }: { includeAvatar: boolean }) {

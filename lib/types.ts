@@ -24,6 +24,12 @@ export type TextStyleId =
   | "dorado"
   | "minimal";
 
+/** Qué tipo de contenido narra el video. */
+export type ContentStyle = "versiculo" | "historia" | "confrontacion";
+
+/** Qué motor generó la voz en off. */
+export type VoiceProvider = "elevenlabs" | "openai" | "edge" | "google" | "none";
+
 export type ProjectStatus = "draft" | "generating" | "ready" | "error";
 
 export interface VideoScript {
@@ -41,6 +47,8 @@ export interface ProjectAssets {
   /** URL (o data URL) del mp3 de la voz en off. */
   audioUrl?: string;
   audioDurationSec?: number;
+  /** Qué motor generó la voz (para mostrarlo y depurar). */
+  voiceProvider?: VoiceProvider;
   wordTimings: WordTiming[];
   /** Video vertical de paisaje. */
   backgroundVideoUrl?: string;
@@ -67,6 +75,8 @@ export interface VideoProject {
   durationSec: number;
   script: VideoScript;
   voiceId: string;
+  /** Tipo de contenido: versículo, historia épica o confrontación viral. */
+  contentStyle?: ContentStyle;
   textStyle: TextStyleId;
   /** Categoría de paisaje, ej. "montañas al amanecer". */
   backgroundQuery: string;
@@ -84,6 +94,7 @@ export interface GenerateRequest {
   manualReference?: string;
   durationSec: number;
   voiceId: string;
+  contentStyle?: ContentStyle;
   textStyle: TextStyleId;
   backgroundQuery: string;
   includeAvatar: boolean;

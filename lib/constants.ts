@@ -102,6 +102,7 @@ export const VOICES = [
     description: "Narrador cálido, ideal para reflexiones",
     edge: "es-MX-JorgeNeural",
     eleven: "onwK4e9ZLuTAKqWW03F9",
+    openai: "onyx",
   },
   {
     id: "alonso",
@@ -109,6 +110,7 @@ export const VOICES = [
     description: "Tono conversacional y emotivo",
     edge: "es-US-AlonsoNeural",
     eleven: "TX3LPaxmHKxFdv7VOQHJ",
+    openai: "echo",
   },
   {
     id: "gonzalo",
@@ -116,6 +118,29 @@ export const VOICES = [
     description: "Voz grave con autoridad amorosa",
     edge: "es-CO-GonzaloNeural",
     eleven: "pqHfZKP75CvOlQylNhV4",
+    openai: "ash",
+  },
+] as const;
+
+/** Estilos de contenido: de la Palabra directa al contenido viral de impacto. */
+export const CONTENT_STYLES = [
+  {
+    id: "versiculo",
+    label: "Versículo directo",
+    emoji: "📖",
+    description: "La Palabra pura con una reflexión que abraza",
+  },
+  {
+    id: "historia",
+    label: "Historia épica",
+    emoji: "⚔️",
+    description: "Relatos bíblicos narrados con drama cinematográfico",
+  },
+  {
+    id: "confrontacion",
+    label: "Impacto viral",
+    emoji: "🔥",
+    description: "Preguntas que confrontan y encienden los comentarios",
   },
 ] as const;
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Info, Quote } from "lucide-react";
+import { ArrowLeft, Info, Mic2, Quote } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,14 +10,42 @@ import { VideoPlayer } from "@/components/preview/video-player";
 import { DownloadButton } from "@/components/preview/download-button";
 import { RegeneratePanel } from "@/components/preview/regenerate-panel";
 import { useProjectStore } from "@/lib/store";
+import { loadAudio } from "@/lib/audio-store";
 import { formatDuration } from "@/lib/utils";
+import type { VoiceProvider } from "@/lib/types";
+
+const VOICE_LABELS: Record<VoiceProvider, string> = {
+  elevenlabs: "🎙️ Voz ElevenLabs Premium",
+  openai: "🎙️ Voz OpenAI Premium",
+  edge: "🎙️ Voz neuronal (gratis)",
+  google: "🎙️ Voz estándar (gratis)",
+  none: "🔇 Sin voz",
+};
 
 export function PreviewClient({ id }: { id: string }) {
   // Espera la hidratación de zustand/persist antes de decidir "no encontrado".
   const [hydrated, setHydrated] = useState(false);
-  const project = useProjectStore((s) => s.projects.find((p) => p.id === id));
+  const storeProject = useProjectStore((s) => s.projects.find((p) => p.id === id));
+  // Audio recuperado de IndexedDB (el historial no guarda el mp3 pesado).
+  const [recoveredAudio, setRecoveredAudio] = useState<string | undefined>();
 
   useEffect(() => setHydrated(true), []);
+
+  useEffect(() => {
+    if (hydrated && storeProject && !storeProject.assets.audioUrl) {
+      loadAudio(id).then((audio) => {
+        if (audio) setRecoveredAudio(audio);
+      });
+    }
+  }, [hydrated, storeProject, id]);
+
+  const project =
+    storeProject && recoveredAudio && !storeProject.assets.audioUrl
+      ? {
+          ...storeProject,
+          assets: { ...storeProject.assets, audioUrl: recoveredAudio },
+        }
+      : storeProject;
 
   if (!hydrated) {
     return (
@@ -62,9 +90,15 @@ export function PreviewClient({ id }: { id: string }) {
             <div className="mb-3 flex flex-wrap items-center gap-2">
               <Badge variant="gold">{project.topic}</Badge>
               <Badge variant="secondary">{formatDuration(project.durationSec)}</Badge>
+              {project.assets.voiceProvider && (
+                <Badge variant="secondary" className="gap-1">
+                  <Mic2 className="h-3 w-3" />
+                  {VOICE_LABELS[project.assets.voiceProvider] ?? "Voz"}
+                </Badge>
+              )}
               {project.demo && (
                 <Badge variant="outline" className="border-amber-500/50 text-amber-400">
-                  Modo demo
+                  Sin voz — reintenta
                 </Badge>
               )}
             </div>

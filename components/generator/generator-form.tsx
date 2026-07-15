@@ -22,6 +22,7 @@ import { WatermarkPicker } from "./watermark-picker";
 import { GenerationProgress } from "./generation-progress";
 import {
   BACKGROUNDS,
+  CONTENT_STYLES,
   DEFAULT_VOICE_ID,
   MAX_DURATION,
   MIN_DURATION,
@@ -29,8 +30,15 @@ import {
   TOPICS,
   VOICES,
 } from "@/lib/constants";
-import type { GenerateRequest, TextStyleId, VideoProject, WatermarkConfig } from "@/lib/types";
+import type {
+  ContentStyle,
+  GenerateRequest,
+  TextStyleId,
+  VideoProject,
+  WatermarkConfig,
+} from "@/lib/types";
 import { useProjectStore } from "@/lib/store";
+import { saveAudio } from "@/lib/audio-store";
 import { formatDuration, cn } from "@/lib/utils";
 
 export function GeneratorForm() {
@@ -39,6 +47,7 @@ export function GeneratorForm() {
   const addProject = useProjectStore((s) => s.addProject);
 
   const [mode, setMode] = useState<"tema" | "mensaje">("tema");
+  const [contentStyle, setContentStyle] = useState<ContentStyle>("versiculo");
   const [topic, setTopic] = useState(params.get("tema") ?? "esperanza");
   const [customMessage, setCustomMessage] = useState("");
   const [manualVerse, setManualVerse] = useState("");
@@ -72,6 +81,7 @@ export function GeneratorForm() {
       manualReference: manualReference || undefined,
       durationSec: duration,
       voiceId,
+      contentStyle,
       textStyle,
       backgroundQuery: background.query,
       includeAvatar,
@@ -89,6 +99,10 @@ export function GeneratorForm() {
         throw new Error(data?.error ?? `Error ${res.status}`);
       }
       const project = (await res.json()) as VideoProject;
+      // Guardar la voz en IndexedDB para que no se pierda al recargar.
+      if (project.assets.audioUrl?.startsWith("data:")) {
+        await saveAudio(project.id, project.assets.audioUrl);
+      }
       addProject(project);
       router.push(`/preview/${project.id}`);
     } catch (err) {
@@ -116,6 +130,36 @@ export function GeneratorForm() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
+            {/* Estilo de contenido: versículo, historia épica o impacto viral */}
+            <div className="grid gap-2 sm:grid-cols-3">
+              {CONTENT_STYLES.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setContentStyle(s.id as ContentStyle)}
+                  className={cn(
+                    "rounded-xl border p-3 text-left transition-all",
+                    contentStyle === s.id
+                      ? "border-gold bg-gold/15 shadow-[0_0_20px_-6px_rgba(212,175,55,0.4)]"
+                      : "border-border hover:border-gold/40"
+                  )}
+                >
+                  <span className="block text-lg">{s.emoji}</span>
+                  <span
+                    className={cn(
+                      "block text-sm font-semibold",
+                      contentStyle === s.id ? "text-gold-light" : "text-foreground"
+                    )}
+                  >
+                    {s.label}
+                  </span>
+                  <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">
+                    {s.description}
+                  </span>
+                </button>
+              ))}
+            </div>
+
             <Tabs value={mode} onValueChange={(v) => setMode(v as "tema" | "mensaje")}>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="tema">Elegir tema</TabsTrigger>

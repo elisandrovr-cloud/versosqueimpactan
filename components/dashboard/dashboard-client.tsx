@@ -24,6 +24,7 @@ import {
 import { StatTile } from "./stat-tile";
 import { TopicBarChart } from "./topic-bar-chart";
 import { ActivityChart } from "./activity-chart";
+import { MonetizationPanel } from "./monetization-panel";
 import { useProjectStore } from "@/lib/store";
 import { computeDashboardStats } from "@/lib/dashboard-stats";
 import { formatDate, formatDuration } from "@/lib/utils";
@@ -126,6 +127,9 @@ export function DashboardClient() {
         </Card>
       </div>
 
+      {/* 💰 Monetización: metas por plataforma + caption lista para publicar */}
+      <MonetizationPanel latest={stats.recent[0]} />
+
       {/* Recientes + acciones rápidas */}
       <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
         <Card className="border-border/60 bg-card/60">
@@ -188,8 +192,8 @@ export function DashboardClient() {
                 <Sparkles className="mb-2 h-4 w-4 text-gold" />
                 Tu audiencia conecta con{" "}
                 <span className="text-foreground">{stats.favoriteTopic}</span>.
-                Prueba una serie de 7 videos sobre este tema para crecer más
-                rápido.
+                Haz una serie de 7 videos de este tema (uno diario) — las
+                series disparan los suscriptores.
               </CardContent>
             </Card>
           )}
