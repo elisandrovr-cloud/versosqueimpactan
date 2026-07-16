@@ -4,7 +4,7 @@ export const APP_NAME = "Versos que Impactan";
 export const APP_TAGLINE =
   "Videos con mensajes de Dios que tocan corazones — generados en un clic.";
 /** Versión visible en el pie de página: confirma qué build está desplegado. */
-export const APP_VERSION = "3.1";
+export const APP_VERSION = "3.2";
 
 /** Duraciones disponibles (segundos). */
 export const DURATIONS = [15, 30, 45, 60, 75, 90] as const;

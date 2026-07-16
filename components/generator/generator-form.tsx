@@ -53,11 +53,14 @@ export function GeneratorForm() {
   const addProject = useProjectStore((s) => s.addProject);
 
   const [mode, setMode] = useState<"tema" | "mensaje">("tema");
-  const [contentStyle, setContentStyle] = useState<ContentStyle>("versiculo");
+  // La Fábrica de Contenido prellena estilo/verso/referencia por query params.
+  const [contentStyle, setContentStyle] = useState<ContentStyle>(
+    (params.get("estilo") as ContentStyle) || "versiculo"
+  );
   const [topic, setTopic] = useState(params.get("tema") ?? "esperanza");
   const [customMessage, setCustomMessage] = useState("");
-  const [manualVerse, setManualVerse] = useState("");
-  const [manualReference, setManualReference] = useState("");
+  const [manualVerse, setManualVerse] = useState(params.get("verso") ?? "");
+  const [manualReference, setManualReference] = useState(params.get("ref") ?? "");
   const [duration, setDuration] = useState(30);
   const [voiceId, setVoiceId] = useState<string>(DEFAULT_VOICE_ID);
   const [textStyle, setTextStyle] = useState<TextStyleId>("elegante");

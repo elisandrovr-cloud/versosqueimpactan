@@ -8,6 +8,7 @@ import {
   History,
   BookOpenText,
   LayoutDashboard,
+  Factory,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import { APP_NAME } from "@/lib/constants";
 
 const links = [
   { href: "/", label: "Inicio", icon: BookOpenText },
+  { href: "/estudio", label: "Fábrica", icon: Factory },
   { href: "/generador", label: "Generador", icon: Clapperboard },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/historial", label: "Mis videos", icon: History },
