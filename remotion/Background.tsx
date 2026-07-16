@@ -30,10 +30,16 @@ export const Background: React.FC<{
   });
 
   const palettes = [
-    ["#0b1026", "#1a2f5c", "#c88a3d"],
-    ["#1a0b26", "#4a2c6d", "#d4af37"],
-    ["#04121f", "#0e3a4f", "#e0a24a"],
-    ["#12081f", "#33224f", "#b8863b"],
+    ["#0b1026", "#1a2f5c", "#c88a3d"], // azul noche + oro (amanecer)
+    ["#1a0b26", "#4a2c6d", "#d4af37"], // púrpura real + oro
+    ["#04121f", "#0e3a4f", "#e0a24a"], // teal profundo + ámbar (océano)
+    ["#12081f", "#33224f", "#b8863b"], // violeta oscuro + bronce
+    ["#0a1f1a", "#1c4a3a", "#e6c35c"], // esmeralda (bosque) + oro
+    ["#210d0a", "#5c2c1c", "#f0a24a"], // terracota (desierto) + naranja
+    ["#1a1206", "#4a3a12", "#ffcf6b"], // dorado cálido (campo)
+    ["#060a1f", "#12224f", "#8fb4ff"], // índigo estrellado + azul cielo
+    ["#0f0618", "#3a1c4a", "#d98cff"], // amatista + lila (cielo nocturno)
+    ["#04141a", "#0e3a44", "#5ce0d0"], // cian glaciar + turquesa
   ];
   const [c1, c2, glow] = palettes[Math.abs(seed) % palettes.length];
   const drift = Math.sin((frame / fps) * 0.35) * 6;

@@ -172,6 +172,12 @@ const PALETTES = [
   ["#1a0b26", "#4a2c6d", "#d4af37"],
   ["#04121f", "#0e3a4f", "#e0a24a"],
   ["#12081f", "#33224f", "#b8863b"],
+  ["#0a1f1a", "#1c4a3a", "#e6c35c"],
+  ["#210d0a", "#5c2c1c", "#f0a24a"],
+  ["#1a1206", "#4a3a12", "#ffcf6b"],
+  ["#060a1f", "#12224f", "#8fb4ff"],
+  ["#0f0618", "#3a1c4a", "#d98cff"],
+  ["#04141a", "#0e3a44", "#5ce0d0"],
 ];
 
 const ICON_PATHS: Record<Exclude<SocialNetwork, "instagram">, string> = {

@@ -4,7 +4,7 @@ import { generateVoice } from "./ai/voice";
 import { findBackground } from "./ai/pexels";
 import { generateLipSync } from "./ai/did";
 import { uploadAudioDataUrl } from "./supabase/server";
-import { generateId } from "./utils";
+import { generateId, humanizeForSpeech } from "./utils";
 
 /**
  * PIPELINE DE GENERACIÓN EN UN SOLO CLIC
@@ -36,9 +36,12 @@ export async function runGenerationPipeline(
   });
 
   // 2 + 3. Voz y fondo en paralelo (son independientes)
+  // La voz lee el texto "humanizado": referencias como "6:17" se convierten
+  // a "capítulo 6, versículo 17" para que NO las lea como una hora.
+  const spokenText = humanizeForSpeech(script.fullText);
   const [voice, background] = await Promise.all([
     generateVoice({
-      text: script.fullText,
+      text: spokenText,
       voiceId: req.voiceId,
       durationSec: req.durationSec,
     }),
