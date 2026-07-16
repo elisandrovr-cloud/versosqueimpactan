@@ -9,8 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { VideoPlayer } from "@/components/preview/video-player";
 import { DownloadButton } from "@/components/preview/download-button";
 import { RegeneratePanel } from "@/components/preview/regenerate-panel";
+import { SharePanel } from "@/components/preview/share-panel";
 import { useProjectStore } from "@/lib/store";
 import { loadAudio } from "@/lib/audio-store";
+import { loadTrack } from "@/lib/music-store";
 import { formatDuration } from "@/lib/utils";
 import type { VoiceProvider } from "@/lib/types";
 
@@ -26,26 +28,36 @@ export function PreviewClient({ id }: { id: string }) {
   // Espera la hidratación de zustand/persist antes de decidir "no encontrado".
   const [hydrated, setHydrated] = useState(false);
   const storeProject = useProjectStore((s) => s.projects.find((p) => p.id === id));
-  // Audio recuperado de IndexedDB (el historial no guarda el mp3 pesado).
+  // Voz y música recuperadas de IndexedDB (el historial no guarda mp3 pesados).
   const [recoveredAudio, setRecoveredAudio] = useState<string | undefined>();
+  const [recoveredMusic, setRecoveredMusic] = useState<string | undefined>();
 
   useEffect(() => setHydrated(true), []);
 
   useEffect(() => {
-    if (hydrated && storeProject && !storeProject.assets.audioUrl) {
+    if (!hydrated || !storeProject) return;
+    if (!storeProject.assets.audioUrl) {
       loadAudio(id).then((audio) => {
         if (audio) setRecoveredAudio(audio);
       });
     }
+    if (!storeProject.assets.musicUrl && storeProject.assets.musicTrackId) {
+      loadTrack(storeProject.assets.musicTrackId).then((track) => {
+        if (track) setRecoveredMusic(track.dataUrl);
+      });
+    }
   }, [hydrated, storeProject, id]);
 
-  const project =
-    storeProject && recoveredAudio && !storeProject.assets.audioUrl
-      ? {
-          ...storeProject,
-          assets: { ...storeProject.assets, audioUrl: recoveredAudio },
-        }
-      : storeProject;
+  const project = storeProject
+    ? {
+        ...storeProject,
+        assets: {
+          ...storeProject.assets,
+          audioUrl: storeProject.assets.audioUrl ?? recoveredAudio,
+          musicUrl: storeProject.assets.musicUrl ?? recoveredMusic,
+        },
+      }
+    : storeProject;
 
   if (!hydrated) {
     return (
@@ -130,6 +142,8 @@ export function PreviewClient({ id }: { id: string }) {
           </Card>
 
           <DownloadButton project={project} />
+
+          <SharePanel project={project} />
 
           <RegeneratePanel project={project} />
 

@@ -23,12 +23,16 @@ interface ProjectStore {
 
 const MAX_HISTORY = 30;
 
-/** Evita guardar mp3 en base64 (varios MB) dentro de localStorage. */
+/**
+ * Evita guardar mp3 en base64 (varios MB) dentro de localStorage.
+ * La voz vive en IndexedDB (lib/audio-store) y la música en la biblioteca
+ * de pistas (lib/music-store); la vista previa las recupera al abrir.
+ */
 function stripHeavyAssets(p: VideoProject): VideoProject {
-  if (p.assets.audioUrl?.startsWith("data:")) {
-    return { ...p, assets: { ...p.assets, audioUrl: undefined } };
-  }
-  return p;
+  const assets = { ...p.assets };
+  if (assets.audioUrl?.startsWith("data:")) assets.audioUrl = undefined;
+  if (assets.musicUrl?.startsWith("data:")) assets.musicUrl = undefined;
+  return { ...p, assets };
 }
 
 export const useProjectStore = create<ProjectStore>()(

@@ -29,6 +29,7 @@ export const VerseVideo: React.FC<VerseVideoProps> = ({
   textStyle,
   captionMode,
   backgroundVideoUrl,
+  backgroundImageUrl,
   audioUrl,
   avatarVideoUrl,
   musicUrl,
@@ -56,7 +57,11 @@ export const VerseVideo: React.FC<VerseVideoProps> = ({
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
       <AbsoluteFill style={{ opacity: fadeOut }}>
-        <Background videoUrl={backgroundVideoUrl} seed={seed} />
+        <Background
+          videoUrl={backgroundVideoUrl}
+          imageUrl={backgroundImageUrl}
+          seed={seed}
+        />
 
         {/* Referencia bíblica */}
         {reference ? (

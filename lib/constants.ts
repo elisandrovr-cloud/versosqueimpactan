@@ -3,6 +3,8 @@ import type { TextStyleId } from "./types";
 export const APP_NAME = "Versos que Impactan";
 export const APP_TAGLINE =
   "Videos con mensajes de Dios que tocan corazones — generados en un clic.";
+/** Versión visible en el pie de página: confirma qué build está desplegado. */
+export const APP_VERSION = "3.0";
 
 /** Duraciones disponibles (segundos). */
 export const DURATIONS = [15, 30, 45, 60, 75, 90] as const;
@@ -28,7 +30,7 @@ export const TOPICS = [
   { id: "nuevocomienzo", label: "Nuevo comienzo", emoji: "🌱" },
 ] as const;
 
-/** Paisajes cinematográficos (query para Pexels / Runway / Kling). */
+/** Galería de paisajes (busca en Pexels + Pixabay + Unsplash, video y foto). */
 export const BACKGROUNDS = [
   { id: "montanas", label: "Montañas al amanecer", query: "mountain sunrise aerial mist" },
   { id: "oceano", label: "Océano dorado", query: "ocean waves sunset golden aerial" },
@@ -38,6 +40,14 @@ export const BACKGROUNDS = [
   { id: "campo", label: "Campo dorado al atardecer", query: "golden field sunset wheat wind" },
   { id: "estrellas", label: "Cielo estrellado", query: "starry night sky timelapse milky way" },
   { id: "lago", label: "Lago en calma", query: "calm lake reflection mountains dawn" },
+  { id: "costa", label: "Amanecer en la costa", query: "coast sunrise beach waves cinematic" },
+  { id: "desierto", label: "Desierto dorado", query: "desert dunes golden hour sand" },
+  { id: "nieve", label: "Montañas nevadas", query: "snowy mountains peaks clouds aerial" },
+  { id: "lluvia", label: "Lluvia en la ventana", query: "rain window drops moody cozy" },
+  { id: "flores", label: "Campo de flores", query: "flower field spring wind blossom" },
+  { id: "cielodramatico", label: "Cielo dramático", query: "dramatic sky storm clouds timelapse" },
+  { id: "rio", label: "Río de montaña", query: "mountain river stream nature flowing" },
+  { id: "velas", label: "Luz de velas", query: "candle light flame dark warm bokeh" },
 ] as const;
 
 /** Estilos de texto animado (estética CapCut premium). */
@@ -86,6 +96,24 @@ export const TEXT_STYLES: {
     highlightColor: "#a5d8ff",
     textTransform: "none",
   },
+  {
+    id: "manuscrita",
+    label: "Manuscrita",
+    description: "Caligrafía cálida y personal",
+    fontFamily: "'Dancing Script', cursive",
+    fontWeight: 700,
+    highlightColor: "#ffd9a0",
+    textTransform: "none",
+  },
+  {
+    id: "cine",
+    label: "Cine épico",
+    description: "Condensada de tráiler de película",
+    fontFamily: "'Bebas Neue', 'Arial Narrow', sans-serif",
+    fontWeight: 400,
+    highlightColor: "#ffcf5c",
+    textTransform: "uppercase",
+  },
 ];
 
 /**
@@ -98,7 +126,7 @@ export const TEXT_STYLES: {
 export const VOICES = [
   {
     id: "jorge",
-    label: "Jorge — cálida y profunda (México)",
+    label: "Jorge — cálida y profunda (México) 👨",
     description: "Narrador cálido, ideal para reflexiones",
     edge: "es-MX-JorgeNeural",
     eleven: "onwK4e9ZLuTAKqWW03F9",
@@ -106,7 +134,7 @@ export const VOICES = [
   },
   {
     id: "alonso",
-    label: "Alonso — cercana y clara (Latino US)",
+    label: "Alonso — cercana y clara (Latino US) 👨",
     description: "Tono conversacional y emotivo",
     edge: "es-US-AlonsoNeural",
     eleven: "TX3LPaxmHKxFdv7VOQHJ",
@@ -114,11 +142,51 @@ export const VOICES = [
   },
   {
     id: "gonzalo",
-    label: "Gonzalo — serena y pastoral (Colombia)",
+    label: "Gonzalo — serena y pastoral (Colombia) 👨",
     description: "Voz grave con autoridad amorosa",
     edge: "es-CO-GonzaloNeural",
     eleven: "pqHfZKP75CvOlQylNhV4",
     openai: "ash",
+  },
+  {
+    id: "tomas",
+    label: "Tomás — expresiva (Argentina) 👨",
+    description: "Acento rioplatense con energía",
+    edge: "es-AR-TomasNeural",
+    eleven: "onwK4e9ZLuTAKqWW03F9",
+    openai: "onyx",
+  },
+  {
+    id: "lorenzo",
+    label: "Lorenzo — juvenil (Chile) 👨",
+    description: "Fresca y directa para audiencia joven",
+    edge: "es-CL-LorenzoNeural",
+    eleven: "TX3LPaxmHKxFdv7VOQHJ",
+    openai: "echo",
+  },
+  {
+    id: "alvaro",
+    label: "Álvaro — clásica (España) 👨",
+    description: "Narración formal estilo documental",
+    edge: "es-ES-AlvaroNeural",
+    eleven: "pqHfZKP75CvOlQylNhV4",
+    openai: "onyx",
+  },
+  {
+    id: "dalia",
+    label: "Dalia — dulce y maternal (México) 👩",
+    description: "Voz femenina que consuela",
+    edge: "es-MX-DaliaNeural",
+    eleven: "EXAVITQu4vr4xnSDxMaL",
+    openai: "nova",
+  },
+  {
+    id: "salome",
+    label: "Salomé — suave y esperanzadora (Colombia) 👩",
+    description: "Voz femenina cálida para promesas",
+    edge: "es-CO-SalomeNeural",
+    eleven: "EXAVITQu4vr4xnSDxMaL",
+    openai: "shimmer",
   },
 ] as const;
 

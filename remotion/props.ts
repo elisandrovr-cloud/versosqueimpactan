@@ -15,6 +15,7 @@ export interface VerseVideoProps extends Record<string, unknown> {
   textStyle: TextStyleId;
   captionMode?: CaptionMode;
   backgroundVideoUrl?: string;
+  backgroundImageUrl?: string;
   audioUrl?: string;
   avatarVideoUrl?: string;
   musicUrl?: string;

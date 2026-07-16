@@ -1,6 +1,7 @@
 import React from "react";
 import {
   AbsoluteFill,
+  Img,
   Video,
   interpolate,
   useCurrentFrame,
@@ -14,10 +15,11 @@ import {
  *  - Sin URL (demo): cielo degradado animado con halo de luz divina.
  * Siempre con viñeta oscura para que el texto sea legible.
  */
-export const Background: React.FC<{ videoUrl?: string; seed: number }> = ({
-  videoUrl,
-  seed,
-}) => {
+export const Background: React.FC<{
+  videoUrl?: string;
+  imageUrl?: string;
+  seed: number;
+}> = ({ videoUrl, imageUrl, seed }) => {
   const frame = useCurrentFrame();
   const { durationInFrames, fps, width, height } = useVideoConfig();
   const haloSize = Math.min(width, height) * 0.85;
@@ -45,6 +47,18 @@ export const Background: React.FC<{ videoUrl?: string; seed: number }> = ({
             muted
             loop
             pauseWhenBuffering
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        </AbsoluteFill>
+      ) : imageUrl ? (
+        // Foto con Ken Burns: zoom + deriva lateral suave.
+        <AbsoluteFill
+          style={{
+            transform: `scale(${scale * 1.06}) translateX(${Math.sin((frame / fps) * 0.15) * 1.5}%)`,
+          }}
+        >
+          <Img
+            src={imageUrl}
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
         </AbsoluteFill>

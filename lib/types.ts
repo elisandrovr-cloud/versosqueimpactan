@@ -22,7 +22,9 @@ export type TextStyleId =
   | "elegante"
   | "impacto"
   | "dorado"
-  | "minimal";
+  | "minimal"
+  | "manuscrita"
+  | "cine";
 
 /** Qué tipo de contenido narra el video. */
 export type ContentStyle = "versiculo" | "historia" | "confrontacion";
@@ -58,7 +60,11 @@ export interface ProjectAssets {
   wordTimings: WordTiming[];
   /** Video vertical de paisaje. */
   backgroundVideoUrl?: string;
+  /** Foto de paisaje (efecto Ken Burns) cuando no hay video disponible. */
+  backgroundImageUrl?: string;
   backgroundPosterUrl?: string;
+  /** Pista de música subida por el usuario (guardada en IndexedDB). */
+  musicTrackId?: string;
   /** Video del avatar con lip sync (D-ID / HeyGen). */
   avatarVideoUrl?: string;
   /** Instrumental de fondo. */

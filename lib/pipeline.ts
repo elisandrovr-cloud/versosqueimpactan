@@ -95,6 +95,7 @@ export async function runGenerationPipeline(
       voiceProvider: voice.provider,
       wordTimings: voice.wordTimings,
       backgroundVideoUrl: background.videoUrl,
+      backgroundImageUrl: background.imageUrl,
       backgroundPosterUrl: background.posterUrl,
       avatarVideoUrl,
       musicUrl: process.env.NEXT_PUBLIC_MUSIC_URL || undefined,

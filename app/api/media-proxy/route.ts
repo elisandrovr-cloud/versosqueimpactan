@@ -11,6 +11,7 @@ export const maxDuration = 60;
 const ALLOWED_HOSTS = [
   /(^|\.)pexels\.com$/,
   /(^|\.)pixabay\.com$/,
+  /(^|\.)unsplash\.com$/,
   /(^|\.)supabase\.co$/,
   /(^|\.)d-id\.com$/,
 ];

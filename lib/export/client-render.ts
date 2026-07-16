@@ -84,6 +84,25 @@ async function loadBackgroundVideo(url?: string): Promise<HTMLVideoElement | nul
   return Number.isFinite(video.duration) && video.duration > 0 ? video : null;
 }
 
+/** Descarga la foto de fondo como blob local (evita problemas de CORS). */
+async function loadBackgroundImage(url?: string): Promise<HTMLImageElement | null> {
+  if (!url) return null;
+  for (const attempt of [url, `/api/media-proxy?url=${encodeURIComponent(url)}`]) {
+    try {
+      const res = await fetch(attempt);
+      if (!res.ok) continue;
+      const objectUrl = URL.createObjectURL(await res.blob());
+      const img = new Image();
+      img.src = objectUrl;
+      await img.decode();
+      return img;
+    } catch {
+      /* probar vía proxy */
+    }
+  }
+  return null;
+}
+
 function seekTo(video: HTMLVideoElement, t: number): Promise<void> {
   return new Promise((resolve) => {
     const target = Math.min(t, Math.max(video.duration - 0.05, 0));
@@ -169,6 +188,7 @@ function drawFrame(
   t: number,
   totalSec: number,
   bgVideo: HTMLVideoElement | null,
+  bgImage: HTMLImageElement | null,
   seed: number
 ) {
   const W = ctx.canvas.width;
@@ -183,6 +203,13 @@ function drawFrame(
     const scale = Math.max(W / vw, H / vh) * zoom;
     const dw = vw * scale, dh = vh * scale;
     ctx.drawImage(bgVideo, (W - dw) / 2, (H - dh) / 2, dw, dh);
+  } else if (bgImage) {
+    // Foto con Ken Burns: zoom + deriva lateral suave.
+    const iw = bgImage.naturalWidth, ih = bgImage.naturalHeight;
+    const scale = Math.max(W / iw, H / ih) * zoom * 1.06;
+    const dw = iw * scale, dh = ih * scale;
+    const drift = Math.sin(t * 0.15) * W * 0.015;
+    ctx.drawImage(bgImage, (W - dw) / 2 + drift, (H - dh) / 2, dw, dh);
   } else {
     const [c1, c2, glow] = PALETTES[Math.abs(seed) % PALETTES.length];
     const grad = ctx.createLinearGradient(0, 0, W * 0.15, H);
@@ -388,8 +415,11 @@ export async function exportVideoInBrowser(
   const codec = await pickVideoCodec(W, H);
   await document.fonts.ready;
 
-  const [bgVideo, audioBuffer] = await Promise.all([
+  const [bgVideo, bgImage, audioBuffer] = await Promise.all([
     loadBackgroundVideo(project.assets.backgroundVideoUrl),
+    loadBackgroundImage(
+      project.assets.backgroundVideoUrl ? undefined : project.assets.backgroundImageUrl
+    ),
     (onProgress({ phase: "audio", pct: 6 }), renderAudioMix(project, durationSec)),
   ]);
 
@@ -476,7 +506,7 @@ export async function exportVideoInBrowser(
     if (encodeError) throw encodeError;
     const t = f / FPS;
     if (bgVideo) await seekTo(bgVideo, t % bgVideo.duration);
-    drawFrame(ctx, project, t, durationSec, bgVideo, seed);
+    drawFrame(ctx, project, t, durationSec, bgVideo, bgImage, seed);
     const frame = new VideoFrame(canvas, {
       timestamp: Math.round(t * 1e6),
       duration: Math.round(1e6 / FPS),

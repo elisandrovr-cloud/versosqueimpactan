@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { WatermarkPicker } from "./watermark-picker";
+import { MusicPicker } from "./music-picker";
 import { GenerationProgress } from "./generation-progress";
 import {
   BACKGROUNDS,
@@ -42,6 +43,7 @@ import type {
 } from "@/lib/types";
 import { useProjectStore } from "@/lib/store";
 import { saveAudio } from "@/lib/audio-store";
+import { loadTrack } from "@/lib/music-store";
 import { fixProjectSync } from "@/lib/client-audio";
 import { formatDuration, cn } from "@/lib/utils";
 
@@ -62,6 +64,7 @@ export function GeneratorForm() {
   const [backgroundId, setBackgroundId] = useState<string>(BACKGROUNDS[0].id);
   const [aspect, setAspect] = useState<AspectId>("9:16");
   const [captionMode, setCaptionMode] = useState<CaptionMode>("palabras");
+  const [musicTrackId, setMusicTrackId] = useState<string | null>(null);
   const includeAvatar = false;
   const [watermark, setWatermark] = useState<WatermarkConfig>({
     enabled: false,
@@ -109,6 +112,16 @@ export function GeneratorForm() {
       let project = (await res.json()) as VideoProject;
       // Corregir la sincronización con la duración REAL del audio.
       project = await fixProjectSync(project);
+      // Adjuntar la música elegida (guardada en el navegador).
+      if (musicTrackId) {
+        const track = await loadTrack(musicTrackId);
+        if (track) {
+          project = {
+            ...project,
+            assets: { ...project.assets, musicTrackId, musicUrl: track.dataUrl },
+          };
+        }
+      }
       // Guardar la voz en IndexedDB para que no se pierda al recargar.
       if (project.assets.audioUrl?.startsWith("data:")) {
         await saveAudio(project.id, project.assets.audioUrl);
@@ -284,6 +297,8 @@ export function GeneratorForm() {
                 </Select>
               </div>
             </div>
+
+            <MusicPicker value={musicTrackId} onChange={setMusicTrackId} />
 
             <div className="space-y-2">
               <Label>Paisaje de fondo</Label>

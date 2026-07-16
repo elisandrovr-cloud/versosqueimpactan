@@ -8,6 +8,8 @@
 
 export interface BackgroundResult {
   videoUrl?: string;
+  /** Foto con efecto Ken Burns cuando no hay video disponible. */
+  imageUrl?: string;
   posterUrl?: string;
   demo: boolean;
 }
@@ -106,12 +108,82 @@ async function searchPixabay(query: string, minDurationSec: number): Promise<Can
   }
 }
 
+/** Fotos de respaldo: Pexels Photos + Pixabay Images + Unsplash. */
+async function searchPhotos(query: string): Promise<string[]> {
+  const results: string[] = [];
+  const pexelsKey = process.env.PEXELS_API_KEY;
+  const pixabayKey = process.env.PIXABAY_API_KEY;
+  const unsplashKey = process.env.UNSPLASH_ACCESS_KEY;
+
+  const tasks: Promise<void>[] = [];
+  if (pexelsKey) {
+    tasks.push(
+      (async () => {
+        try {
+          const url = new URL("https://api.pexels.com/v1/search");
+          url.searchParams.set("query", query);
+          url.searchParams.set("orientation", "portrait");
+          url.searchParams.set("per_page", "10");
+          const res = await fetch(url, { headers: { Authorization: pexelsKey } });
+          if (!res.ok) return;
+          const data = (await res.json()) as { photos: { src: { large2x: string } }[] };
+          results.push(...data.photos.map((p) => p.src.large2x));
+        } catch {
+          /* seguir */
+        }
+      })()
+    );
+  }
+  if (pixabayKey) {
+    tasks.push(
+      (async () => {
+        try {
+          const url = new URL("https://pixabay.com/api/");
+          url.searchParams.set("key", pixabayKey);
+          url.searchParams.set("q", query);
+          url.searchParams.set("orientation", "vertical");
+          url.searchParams.set("per_page", "10");
+          url.searchParams.set("safesearch", "true");
+          const res = await fetch(url);
+          if (!res.ok) return;
+          const data = (await res.json()) as { hits: { largeImageURL: string }[] };
+          results.push(...data.hits.map((h) => h.largeImageURL));
+        } catch {
+          /* seguir */
+        }
+      })()
+    );
+  }
+  if (unsplashKey) {
+    tasks.push(
+      (async () => {
+        try {
+          const url = new URL("https://api.unsplash.com/search/photos");
+          url.searchParams.set("query", query);
+          url.searchParams.set("orientation", "portrait");
+          url.searchParams.set("per_page", "10");
+          const res = await fetch(url, {
+            headers: { Authorization: `Client-ID ${unsplashKey}` },
+          });
+          if (!res.ok) return;
+          const data = (await res.json()) as { results: { urls: { regular: string } }[] };
+          results.push(...data.results.map((r) => r.urls.regular));
+        } catch {
+          /* seguir */
+        }
+      })()
+    );
+  }
+  await Promise.all(tasks);
+  return results;
+}
+
 export async function findBackground(opts: {
   query: string;
   minDurationSec: number;
   seed?: number;
 }): Promise<BackgroundResult> {
-  // Buscar en ambas librerías en paralelo y combinar.
+  // Buscar VIDEO en ambas librerías en paralelo y combinar.
   const [pexels, pixabay] = await Promise.all([
     searchPexels(opts.query, opts.minDurationSec),
     searchPixabay(opts.query, opts.minDurationSec),
@@ -120,8 +192,17 @@ export async function findBackground(opts: {
   // Preferir archivos verticales (se ven perfectos en 9:16 sin recorte).
   const portrait = [...pexels, ...pixabay].filter((c) => c.portrait);
   const candidates = portrait.length > 0 ? portrait : [...pexels, ...pixabay];
-  if (candidates.length === 0) return { demo: true };
+  if (candidates.length > 0) {
+    const chosen = candidates[Math.abs(opts.seed ?? 0) % candidates.length];
+    return { videoUrl: chosen.videoUrl, posterUrl: chosen.posterUrl, demo: false };
+  }
 
-  const chosen = candidates[Math.abs(opts.seed ?? 0) % candidates.length];
-  return { videoUrl: chosen.videoUrl, posterUrl: chosen.posterUrl, demo: false };
+  // Sin video: FOTO con efecto Ken Burns (Pexels/Pixabay/Unsplash).
+  const photos = await searchPhotos(opts.query);
+  if (photos.length > 0) {
+    const photo = photos[Math.abs(opts.seed ?? 0) % photos.length];
+    return { imageUrl: photo, posterUrl: photo, demo: false };
+  }
+
+  return { demo: true };
 }
