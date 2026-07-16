@@ -19,7 +19,8 @@ export const Background: React.FC<{ videoUrl?: string; seed: number }> = ({
   seed,
 }) => {
   const frame = useCurrentFrame();
-  const { durationInFrames, fps } = useVideoConfig();
+  const { durationInFrames, fps, width, height } = useVideoConfig();
+  const haloSize = Math.min(width, height) * 0.85;
 
   // Ken Burns: zoom lentísimo de 1.0 a 1.12 durante todo el video.
   const scale = interpolate(frame, [0, durationInFrames], [1, 1.12], {
@@ -60,8 +61,8 @@ export const Background: React.FC<{ videoUrl?: string; seed: number }> = ({
               position: "absolute",
               top: "18%",
               left: "50%",
-              width: 900,
-              height: 900,
+              width: haloSize,
+              height: haloSize,
               transform: `translate(-50%, -50%) scale(${1 + Math.sin((frame / fps) * 0.6) * 0.08})`,
               background: `radial-gradient(circle, ${glow}55 0%, transparent 65%)`,
               filter: "blur(20px)",

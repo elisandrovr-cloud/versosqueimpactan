@@ -1,4 +1,9 @@
-import type { TextStyleId, WatermarkConfig, WordTiming } from "@/lib/types";
+import type {
+  CaptionMode,
+  TextStyleId,
+  WatermarkConfig,
+  WordTiming,
+} from "@/lib/types";
 
 /**
  * Props que recibe la composición VerseVideo (Player y render de servidor).
@@ -8,6 +13,7 @@ export interface VerseVideoProps extends Record<string, unknown> {
   reference: string;
   wordTimings: WordTiming[];
   textStyle: TextStyleId;
+  captionMode?: CaptionMode;
   backgroundVideoUrl?: string;
   audioUrl?: string;
   avatarVideoUrl?: string;

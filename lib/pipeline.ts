@@ -80,6 +80,8 @@ export async function runGenerationPipeline(
     script,
     voiceId: req.voiceId,
     contentStyle: req.contentStyle ?? "versiculo",
+    aspect: req.aspect ?? "9:16",
+    captionMode: req.captionMode ?? "palabras",
     textStyle: req.textStyle,
     backgroundQuery: req.backgroundQuery,
     includeAvatar: req.includeAvatar,

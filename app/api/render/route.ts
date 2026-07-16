@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import path from "node:path";
 import os from "node:os";
 import fs from "node:fs/promises";
-import { FPS } from "@/lib/constants";
+import { FPS, resolveFormat } from "@/lib/constants";
 import type { VideoProject } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -68,10 +68,12 @@ export async function POST(req: NextRequest) {
       getBundle(),
     ]);
 
+    const fmt = resolveFormat(project.aspect);
     const inputProps = {
       reference: project.script.reference,
       wordTimings: project.assets.wordTimings,
       textStyle: project.textStyle,
+      captionMode: project.captionMode ?? "palabras",
       backgroundVideoUrl: project.assets.backgroundVideoUrl,
       audioUrl: project.assets.audioUrl,
       avatarVideoUrl: project.assets.avatarVideoUrl,
@@ -90,6 +92,8 @@ export async function POST(req: NextRequest) {
       composition: {
         ...composition,
         durationInFrames: Math.max(Math.round(project.durationSec * FPS), FPS),
+        width: fmt.width,
+        height: fmt.height,
       },
       serveUrl,
       codec: "h264",

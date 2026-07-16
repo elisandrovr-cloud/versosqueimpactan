@@ -27,6 +27,7 @@ export const VerseVideo: React.FC<VerseVideoProps> = ({
   reference,
   wordTimings,
   textStyle,
+  captionMode,
   backgroundVideoUrl,
   audioUrl,
   avatarVideoUrl,
@@ -35,7 +36,9 @@ export const VerseVideo: React.FC<VerseVideoProps> = ({
   seed,
 }) => {
   const frame = useCurrentFrame();
-  const { fps, durationInFrames } = useVideoConfig();
+  const { fps, durationInFrames, width, height } = useVideoConfig();
+  // Todo escala con el lado corto: se ve igual en 9:16, 1:1 y 16:9.
+  const s = Math.min(width, height) / 1080;
 
   const refEnter = spring({
     frame: frame - Math.round(fps * 0.5),
@@ -60,7 +63,7 @@ export const VerseVideo: React.FC<VerseVideoProps> = ({
           <div
             style={{
               position: "absolute",
-              top: 200,
+              top: height * 0.1,
               left: 0,
               right: 0,
               display: "flex",
@@ -71,15 +74,15 @@ export const VerseVideo: React.FC<VerseVideoProps> = ({
           >
             <div
               style={{
-                padding: "18px 44px",
+                padding: `${18 * s}px ${44 * s}px`,
                 borderRadius: 999,
                 border: "1.5px solid rgba(212,175,55,0.65)",
                 background: "rgba(0,0,0,0.35)",
                 backdropFilter: "blur(8px)",
                 fontFamily: "'Cormorant Garamond', Georgia, serif",
-                fontSize: 44,
+                fontSize: 44 * s,
                 fontWeight: 600,
-                letterSpacing: 3,
+                letterSpacing: 3 * s,
                 color: "#f0d78c",
                 textTransform: "uppercase",
               }}
@@ -89,17 +92,21 @@ export const VerseVideo: React.FC<VerseVideoProps> = ({
           </div>
         ) : null}
 
-        <Captions wordTimings={wordTimings} textStyle={textStyle} />
+        <Captions
+          wordTimings={wordTimings}
+          textStyle={textStyle}
+          captionMode={captionMode}
+        />
 
         {/* Avatar con lip sync */}
         {avatarVideoUrl ? (
           <div
             style={{
               position: "absolute",
-              bottom: 260,
-              right: 70,
-              width: 320,
-              height: 320,
+              bottom: 260 * s,
+              right: 70 * s,
+              width: 320 * s,
+              height: 320 * s,
               borderRadius: "50%",
               overflow: "hidden",
               border: "4px solid rgba(212,175,55,0.85)",

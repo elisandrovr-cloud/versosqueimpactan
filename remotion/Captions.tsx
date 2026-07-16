@@ -1,59 +1,40 @@
 import React, { useMemo } from "react";
 import { interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
-import type { WordTiming } from "@/lib/types";
-import { TEXT_STYLES } from "@/lib/constants";
-import type { TextStyleId } from "@/lib/types";
+import type { CaptionMode, TextStyleId, WordTiming } from "@/lib/types";
+import {
+  activePage,
+  captionFontSize,
+  getPages,
+  getTextStyle,
+} from "@/lib/captions";
 
 /**
- * Subtítulos animados estilo CapCut premium:
- *  - Las palabras se agrupan en "páginas" de 3-6 palabras (cortando en puntuación).
- *  - Cada página entra con spring (escala + fade).
- *  - La palabra que se está pronunciando se resalta (karaoke) con color
- *    y un pop sutil, perfectamente sincronizada con la voz.
+ * Subtítulos animados estilo CapCut premium (lógica en lib/captions.ts):
+ *  - Modo "palabras": páginas de 4-5 palabras grandes tipo karaoke.
+ *  - Modo "parrafo": la oración completa en pantalla, con letra que se
+ *    ajusta automáticamente para caber, y karaoke palabra por palabra.
+ * El tamaño escala con el lado corto del lienzo (9:16, 1:1 o 16:9).
  */
-
-interface Page {
-  words: WordTiming[];
-  start: number;
-  end: number;
-}
-
-const MAX_WORDS_PER_PAGE = 5;
-
-function paginate(timings: WordTiming[]): Page[] {
-  const pages: Page[] = [];
-  let current: WordTiming[] = [];
-  for (const t of timings) {
-    current.push(t);
-    const endsClause = /[.,;:!?…]$/.test(t.word);
-    if (current.length >= MAX_WORDS_PER_PAGE || (endsClause && current.length >= 2)) {
-      pages.push({ words: current, start: current[0].start, end: t.end });
-      current = [];
-    }
-  }
-  if (current.length > 0) {
-    pages.push({
-      words: current,
-      start: current[0].start,
-      end: current[current.length - 1].end,
-    });
-  }
-  return pages;
-}
-
 export const Captions: React.FC<{
   wordTimings: WordTiming[];
   textStyle: TextStyleId;
-}> = ({ wordTimings, textStyle }) => {
+  captionMode?: CaptionMode;
+}> = ({ wordTimings, textStyle, captionMode = "palabras" }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, width, height } = useVideoConfig();
   const t = frame / fps;
+  const minDim = Math.min(width, height);
 
-  const style = TEXT_STYLES.find((s) => s.id === textStyle) ?? TEXT_STYLES[0];
-  const pages = useMemo(() => paginate(wordTimings), [wordTimings]);
+  const style = getTextStyle(textStyle);
+  const pages = useMemo(
+    () => getPages(wordTimings, captionMode),
+    [wordTimings, captionMode]
+  );
 
-  const page = pages.find((p) => t >= p.start - 0.15 && t <= p.end + 0.35);
+  const page = activePage(pages, t);
   if (!page) return null;
+
+  const fontSize = captionFontSize(page, captionMode, minDim);
 
   const pageStartFrame = Math.round((page.start - 0.15) * fps);
   const enter = spring({
@@ -68,18 +49,21 @@ export const Captions: React.FC<{
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
 
+  const isParagraph = captionMode === "parrafo";
+
   return (
     <div
       style={{
         position: "absolute",
         left: 0,
         right: 0,
-        top: "38%",
+        ...(isParagraph
+          ? { top: "50%", transform: `translateY(-50%) translateY(${(1 - enter) * 30}px) scale(${0.94 + enter * 0.06})` }
+          : { top: "38%", transform: `translateY(${(1 - enter) * 30}px) scale(${0.94 + enter * 0.06})` }),
         display: "flex",
         justifyContent: "center",
-        padding: "0 90px",
+        padding: "0 8%",
         opacity: enter * exitOpacity,
-        transform: `translateY(${(1 - enter) * 30}px) scale(${0.94 + enter * 0.06})`,
       }}
     >
       <p
@@ -88,7 +72,7 @@ export const Captions: React.FC<{
           textAlign: "center",
           fontFamily: style.fontFamily,
           fontWeight: style.fontWeight,
-          fontSize: 84,
+          fontSize,
           lineHeight: 1.28,
           color: "#ffffff",
           textTransform: style.textTransform,
@@ -111,7 +95,6 @@ export const Captions: React.FC<{
                 color: active || spoken ? style.highlightColor : "#ffffff",
                 opacity: active || spoken ? 1 : 0.82,
                 transform: `scale(${pop})`,
-                transition: "color 80ms linear",
                 textShadow: active
                   ? `0 0 32px ${style.highlightColor}88, 0 4px 24px rgba(0,0,0,0.85)`
                   : undefined,

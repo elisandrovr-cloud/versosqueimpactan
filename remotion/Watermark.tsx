@@ -51,9 +51,10 @@ export const Watermark: React.FC<{ watermark: WatermarkConfig }> = ({
   watermark,
 }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, width, height } = useVideoConfig();
   if (!watermark.enabled || !watermark.handle) return null;
 
+  const s = Math.min(width, height) / 1080;
   const opacity = interpolate(frame, [fps * 0.8, fps * 1.6], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
@@ -63,26 +64,26 @@ export const Watermark: React.FC<{ watermark: WatermarkConfig }> = ({
     <div
       style={{
         position: "absolute",
-        bottom: 96,
+        bottom: 96 * s,
         left: 0,
         right: 0,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        gap: 18,
+        gap: 18 * s,
         opacity: opacity * 0.92,
       }}
     >
-      <div style={{ display: "flex", gap: 12 }}>
+      <div style={{ display: "flex", gap: 12 * s }}>
         {watermark.networks.map((n) => (
-          <SocialIcon key={n} network={n} />
+          <SocialIcon key={n} network={n} size={34 * s} />
         ))}
       </div>
       <span
         style={{
           fontFamily: "'Inter', system-ui, sans-serif",
           fontWeight: 600,
-          fontSize: 34,
+          fontSize: 34 * s,
           letterSpacing: 1,
           color: "rgba(255,255,255,0.92)",
           textShadow: "0 2px 12px rgba(0,0,0,0.8)",

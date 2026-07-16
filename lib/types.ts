@@ -27,6 +27,12 @@ export type TextStyleId =
 /** Qué tipo de contenido narra el video. */
 export type ContentStyle = "versiculo" | "historia" | "confrontacion";
 
+/** Formato del lienzo según la plataforma destino. */
+export type AspectId = "9:16" | "1:1" | "16:9";
+
+/** Cómo se muestran los subtítulos. */
+export type CaptionMode = "palabras" | "parrafo";
+
 /** Qué motor generó la voz en off. */
 export type VoiceProvider = "elevenlabs" | "openai" | "edge" | "google" | "none";
 
@@ -77,6 +83,10 @@ export interface VideoProject {
   voiceId: string;
   /** Tipo de contenido: versículo, historia épica o confrontación viral. */
   contentStyle?: ContentStyle;
+  /** Formato de plataforma: 9:16 (Shorts/TikTok), 1:1 (Facebook), 16:9 (YouTube). */
+  aspect?: AspectId;
+  /** Subtítulos por grupos de palabras o párrafo completo. */
+  captionMode?: CaptionMode;
   textStyle: TextStyleId;
   /** Categoría de paisaje, ej. "montañas al amanecer". */
   backgroundQuery: string;
@@ -95,6 +105,8 @@ export interface GenerateRequest {
   durationSec: number;
   voiceId: string;
   contentStyle?: ContentStyle;
+  aspect?: AspectId;
+  captionMode?: CaptionMode;
   textStyle: TextStyleId;
   backgroundQuery: string;
   includeAvatar: boolean;

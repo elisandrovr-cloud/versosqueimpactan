@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -22,8 +21,10 @@ import { WatermarkPicker } from "./watermark-picker";
 import { GenerationProgress } from "./generation-progress";
 import {
   BACKGROUNDS,
+  CAPTION_MODES,
   CONTENT_STYLES,
   DEFAULT_VOICE_ID,
+  FORMATS,
   MAX_DURATION,
   MIN_DURATION,
   TEXT_STYLES,
@@ -31,6 +32,8 @@ import {
   VOICES,
 } from "@/lib/constants";
 import type {
+  AspectId,
+  CaptionMode,
   ContentStyle,
   GenerateRequest,
   TextStyleId,
@@ -39,6 +42,7 @@ import type {
 } from "@/lib/types";
 import { useProjectStore } from "@/lib/store";
 import { saveAudio } from "@/lib/audio-store";
+import { fixProjectSync } from "@/lib/client-audio";
 import { formatDuration, cn } from "@/lib/utils";
 
 export function GeneratorForm() {
@@ -56,7 +60,9 @@ export function GeneratorForm() {
   const [voiceId, setVoiceId] = useState<string>(DEFAULT_VOICE_ID);
   const [textStyle, setTextStyle] = useState<TextStyleId>("elegante");
   const [backgroundId, setBackgroundId] = useState<string>(BACKGROUNDS[0].id);
-  const [includeAvatar, setIncludeAvatar] = useState(false);
+  const [aspect, setAspect] = useState<AspectId>("9:16");
+  const [captionMode, setCaptionMode] = useState<CaptionMode>("palabras");
+  const includeAvatar = false;
   const [watermark, setWatermark] = useState<WatermarkConfig>({
     enabled: false,
     handle: "",
@@ -82,6 +88,8 @@ export function GeneratorForm() {
       durationSec: duration,
       voiceId,
       contentStyle,
+      aspect,
+      captionMode,
       textStyle,
       backgroundQuery: background.query,
       includeAvatar,
@@ -98,7 +106,9 @@ export function GeneratorForm() {
         const data = await res.json().catch(() => null);
         throw new Error(data?.error ?? `Error ${res.status}`);
       }
-      const project = (await res.json()) as VideoProject;
+      let project = (await res.json()) as VideoProject;
+      // Corregir la sincronización con la duración REAL del audio.
+      project = await fixProjectSync(project);
       // Guardar la voz en IndexedDB para que no se pierda al recargar.
       if (project.assets.audioUrl?.startsWith("data:")) {
         await saveAudio(project.id, project.assets.audioUrl);
@@ -296,20 +306,75 @@ export function GeneratorForm() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between rounded-lg border border-border/60 bg-secondary/40 p-4">
-              <div>
-                <Label htmlFor="avatar-switch" className="text-base">
-                  Avatar con lip sync
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  Rostro realista hablando el versículo (requiere D-ID/HeyGen)
-                </p>
+            <div className="space-y-2">
+              <Label>Plataforma / formato</Label>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {FORMATS.map((f) => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => setAspect(f.id as AspectId)}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg border p-3 text-left transition-all",
+                      aspect === f.id
+                        ? "border-gold bg-gold/15"
+                        : "border-border hover:border-gold/40"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "shrink-0 rounded-sm border-2",
+                        aspect === f.id ? "border-gold-light" : "border-muted-foreground",
+                        f.id === "9:16" && "h-8 w-[18px]",
+                        f.id === "1:1" && "h-7 w-7",
+                        f.id === "16:9" && "h-[18px] w-8"
+                      )}
+                    />
+                    <span>
+                      <span
+                        className={cn(
+                          "block text-sm font-semibold",
+                          aspect === f.id ? "text-gold-light" : "text-foreground"
+                        )}
+                      >
+                        {f.label}
+                      </span>
+                      <span className="block text-xs text-muted-foreground">{f.hint}</span>
+                    </span>
+                  </button>
+                ))}
               </div>
-              <Switch
-                id="avatar-switch"
-                checked={includeAvatar}
-                onCheckedChange={setIncludeAvatar}
-              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Subtítulos</Label>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {CAPTION_MODES.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => setCaptionMode(m.id as CaptionMode)}
+                    className={cn(
+                      "rounded-lg border p-3 text-left transition-all",
+                      captionMode === m.id
+                        ? "border-gold bg-gold/15"
+                        : "border-border hover:border-gold/40"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "block text-sm font-semibold",
+                        captionMode === m.id ? "text-gold-light" : "text-foreground"
+                      )}
+                    >
+                      {m.label}
+                    </span>
+                    <span className="block text-xs text-muted-foreground">
+                      {m.description}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>

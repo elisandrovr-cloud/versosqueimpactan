@@ -122,6 +122,49 @@ export const VOICES = [
   },
 ] as const;
 
+/** Formatos por plataforma: el lienzo se adapta a donde vas a publicar. */
+export const FORMATS = [
+  {
+    id: "9:16",
+    label: "Vertical",
+    hint: "TikTok · Reels · Shorts",
+    width: 1080,
+    height: 1920,
+  },
+  {
+    id: "1:1",
+    label: "Cuadrado",
+    hint: "Facebook · Feed",
+    width: 1080,
+    height: 1080,
+  },
+  {
+    id: "16:9",
+    label: "Horizontal",
+    hint: "YouTube largo",
+    width: 1920,
+    height: 1080,
+  },
+] as const;
+
+export function resolveFormat(aspect?: string) {
+  return FORMATS.find((f) => f.id === aspect) ?? FORMATS[0];
+}
+
+/** Modos de subtítulos. */
+export const CAPTION_MODES = [
+  {
+    id: "palabras",
+    label: "Karaoke",
+    description: "Grupos de 4-5 palabras grandes, al ritmo de la voz",
+  },
+  {
+    id: "parrafo",
+    label: "Párrafo completo",
+    description: "Toda la frase en pantalla, ajustada al tamaño",
+  },
+] as const;
+
 /** Estilos de contenido: de la Palabra directa al contenido viral de impacto. */
 export const CONTENT_STYLES = [
   {
