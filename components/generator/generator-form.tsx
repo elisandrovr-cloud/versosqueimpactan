@@ -22,6 +22,8 @@ import { MusicPicker } from "./music-picker";
 import { GenerationProgress } from "./generation-progress";
 import {
   BACKGROUNDS,
+  BUNDLED_BACKGROUNDS,
+  bundledBackgroundUrl,
   CAPTION_MODES,
   CONTENT_STYLES,
   DEFAULT_VOICE_ID,
@@ -65,6 +67,8 @@ export function GeneratorForm() {
   const [voiceId, setVoiceId] = useState<string>(DEFAULT_VOICE_ID);
   const [textStyle, setTextStyle] = useState<TextStyleId>("elegante");
   const [backgroundId, setBackgroundId] = useState<string>(BACKGROUNDS[0].id);
+  const [bgSource, setBgSource] = useState<"galeria" | "real">("galeria");
+  const [bundledBg, setBundledBg] = useState<string>(BUNDLED_BACKGROUNDS[0].id);
   const [aspect, setAspect] = useState<AspectId>("9:16");
   const [captionMode, setCaptionMode] = useState<CaptionMode>("palabras");
   const [musicTrackId, setMusicTrackId] = useState<string | null>(null);
@@ -98,6 +102,7 @@ export function GeneratorForm() {
       captionMode,
       textStyle,
       backgroundQuery: background.query,
+      bundledBackground: bgSource === "galeria" ? bundledBg : undefined,
       includeAvatar,
       watermark,
     };
@@ -303,25 +308,80 @@ export function GeneratorForm() {
 
             <MusicPicker value={musicTrackId} onChange={setMusicTrackId} />
 
-            <div className="space-y-2">
-              <Label>Paisaje de fondo</Label>
-              <div className="flex flex-wrap gap-2">
-                {BACKGROUNDS.map((b) => (
-                  <button
-                    key={b.id}
-                    type="button"
-                    onClick={() => setBackgroundId(b.id)}
-                    className={cn(
-                      "rounded-md border px-3 py-2 text-xs transition-all",
-                      backgroundId === b.id
-                        ? "border-gold bg-gold/15 font-medium text-gold-light"
-                        : "border-border text-muted-foreground hover:border-gold/40"
-                    )}
-                  >
-                    {b.label}
-                  </button>
-                ))}
+            <div className="space-y-3">
+              <Label>Fondo del video</Label>
+              {/* Fuente del fondo: galería incluida (siempre funciona) o paisaje real */}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setBgSource("galeria")}
+                  className={cn(
+                    "flex-1 rounded-md border px-3 py-2 text-xs font-medium transition-all",
+                    bgSource === "galeria"
+                      ? "border-gold bg-gold/15 text-gold-light"
+                      : "border-border text-muted-foreground hover:border-gold/40"
+                  )}
+                >
+                  🖼️ Galería incluida (siempre funciona)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBgSource("real")}
+                  className={cn(
+                    "flex-1 rounded-md border px-3 py-2 text-xs font-medium transition-all",
+                    bgSource === "real"
+                      ? "border-gold bg-gold/15 text-gold-light"
+                      : "border-border text-muted-foreground hover:border-gold/40"
+                  )}
+                >
+                  🎬 Paisaje real en video (necesita clave Pexels)
+                </button>
               </div>
+
+              {bgSource === "galeria" ? (
+                <div className="grid grid-cols-4 gap-2">
+                  {BUNDLED_BACKGROUNDS.map((b) => (
+                    <button
+                      key={b.id}
+                      type="button"
+                      onClick={() => setBundledBg(b.id)}
+                      className={cn(
+                        "overflow-hidden rounded-lg border-2 transition-all",
+                        bundledBg === b.id
+                          ? "border-gold shadow-[0_0_16px_-4px_rgba(212,175,55,0.5)]"
+                          : "border-transparent hover:border-gold/40"
+                      )}
+                      title={b.label}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={bundledBackgroundUrl(b.id)}
+                        alt={b.label}
+                        className="aspect-[9/16] w-full object-cover"
+                        loading="lazy"
+                      />
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {BACKGROUNDS.map((b) => (
+                    <button
+                      key={b.id}
+                      type="button"
+                      onClick={() => setBackgroundId(b.id)}
+                      className={cn(
+                        "rounded-md border px-3 py-2 text-xs transition-all",
+                        backgroundId === b.id
+                          ? "border-gold bg-gold/15 font-medium text-gold-light"
+                          : "border-border text-muted-foreground hover:border-gold/40"
+                      )}
+                    >
+                      {b.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">

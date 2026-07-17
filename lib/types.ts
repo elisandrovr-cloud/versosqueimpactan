@@ -115,6 +115,9 @@ export interface GenerateRequest {
   captionMode?: CaptionMode;
   textStyle: TextStyleId;
   backgroundQuery: string;
+  /** Fondo de la galería incluida (ej. "montanas-amanecer"). Si se elige,
+   * se usa directamente sin buscar en Pexels. */
+  bundledBackground?: string;
   includeAvatar: boolean;
   watermark: WatermarkConfig;
   /** Semilla para regenerar con variaciones. */

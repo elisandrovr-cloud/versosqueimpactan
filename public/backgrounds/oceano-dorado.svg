@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#20304f"/><stop offset="0.45" stop-color="#c87a4a"/><stop offset="0.62" stop-color="#f0a24a"/><stop offset="1" stop-color="#ffcf7a"/></linearGradient>
+<linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c88a4a"/><stop offset="1" stop-color="#0a1420"/></linearGradient>
+<linearGradient id="fieldGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#3a2a10"/></linearGradient>
+<radialGradient id="glow" cx="50%" cy="50%" r="50%">
+  <stop offset="0" stop-color="#ffb84a" stop-opacity="0.55"/>
+  <stop offset="100%" stop-color="#ffb84a" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="vig" cx="50%" cy="45%" r="75%">
+  <stop offset="55%" stop-color="#000" stop-opacity="0"/>
+  <stop offset="100%" stop-color="#000" stop-opacity="0.6"/>
+</radialGradient>
+<linearGradient id="topbot" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#000" stop-opacity="0.35"/>
+  <stop offset="0.28" stop-color="#000" stop-opacity="0"/>
+  <stop offset="0.65" stop-color="#000" stop-opacity="0"/>
+  <stop offset="1" stop-color="#000" stop-opacity="0.62"/>
+</linearGradient>
+</defs>
+<rect width="1080" height="1920" fill="url(#sky)"/><circle cx="540" cy="780" r="408" fill="url(#glow)"/><circle cx="540" cy="780" r="170" fill="#fff0c0" opacity="0.92"/><rect y="1150" width="1080" height="770" fill="url(#seaGrad)"/><ellipse cx="540" cy="1150" rx="120" ry="770" fill="#fff0c0" opacity="0.28"/><rect x="0" y="1190" width="1080" height="3" fill="#fff" opacity="0.120"/><rect x="0" y="1300" width="1080" height="3" fill="#fff" opacity="0.105"/><rect x="0" y="1410" width="1080" height="3" fill="#fff" opacity="0.090"/><rect x="0" y="1520" width="1080" height="3" fill="#fff" opacity="0.075"/><rect x="0" y="1630" width="1080" height="3" fill="#fff" opacity="0.060"/><rect x="0" y="1740" width="1080" height="3" fill="#fff" opacity="0.045"/><rect x="0" y="1850" width="1080" height="3" fill="#fff" opacity="0.030"/><rect width="1080" height="1920" fill="url(#vig)"/><rect width="1080" height="1920" fill="url(#topbot)"/>
+</svg>

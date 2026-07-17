@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a4a8f"/><stop offset="0.5" stop-color="#6a8fd0"/><stop offset="1" stop-color="#e6d0a0"/></linearGradient>
+<linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#0a1420"/></linearGradient>
+<linearGradient id="fieldGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#3a2a10"/></linearGradient>
+<radialGradient id="glow" cx="50%" cy="50%" r="50%">
+  <stop offset="0" stop-color="#ffe6a0" stop-opacity="0.55"/>
+  <stop offset="100%" stop-color="#ffe6a0" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="vig" cx="50%" cy="45%" r="75%">
+  <stop offset="55%" stop-color="#000" stop-opacity="0"/>
+  <stop offset="100%" stop-color="#000" stop-opacity="0.6"/>
+</radialGradient>
+<linearGradient id="topbot" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#000" stop-opacity="0.35"/>
+  <stop offset="0.28" stop-color="#000" stop-opacity="0"/>
+  <stop offset="0.65" stop-color="#000" stop-opacity="0"/>
+  <stop offset="1" stop-color="#000" stop-opacity="0.62"/>
+</linearGradient>
+</defs>
+<rect width="1080" height="1920" fill="url(#sky)"/><polygon points="540,560 2458,483 2460,560" fill="#ffe6a0" opacity="0.06"/><polygon points="540,560 2240,1453 2203,1520" fill="#ffe6a0" opacity="0.06"/><polygon points="540,560 1566,2183 1500,2223" fill="#ffe6a0" opacity="0.06"/><polygon points="540,560 617,2478 540,2480" fill="#ffe6a0" opacity="0.06"/><polygon points="540,560 -353,2260 -420,2223" fill="#ffe6a0" opacity="0.06"/><polygon points="540,560 -1083,1586 -1123,1520" fill="#ffe6a0" opacity="0.06"/><polygon points="540,560 -1378,637 -1380,560" fill="#ffe6a0" opacity="0.06"/><polygon points="540,560 -1160,-333 -1123,-400" fill="#ffe6a0" opacity="0.06"/><polygon points="540,560 -486,-1063 -420,-1103" fill="#ffe6a0" opacity="0.06"/><polygon points="540,560 463,-1358 540,-1360" fill="#ffe6a0" opacity="0.06"/><polygon points="540,560 1433,-1140 1500,-1103" fill="#ffe6a0" opacity="0.06"/><polygon points="540,560 2163,-466 2203,-400" fill="#ffe6a0" opacity="0.06"/><circle cx="540" cy="560" r="480" fill="url(#glow)"/><circle cx="540" cy="560" r="200" fill="#fffbe8" opacity="0.92"/><ellipse cx="300" cy="1250" rx="260" ry="83.2" fill="#f0e8d8" opacity="0.85"/><ellipse cx="780" cy="1400" rx="320" ry="102.4" fill="#f0e8d8" opacity="0.85"/><ellipse cx="520" cy="1600" rx="400" ry="128" fill="#f0e8d8" opacity="0.85"/><ellipse cx="180" cy="1500" rx="200" ry="64" fill="#f0e8d8" opacity="0.85"/><rect width="1080" height="1920" fill="url(#vig)"/><rect width="1080" height="1920" fill="url(#topbot)"/>
+</svg>

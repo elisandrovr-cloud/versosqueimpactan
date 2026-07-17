@@ -39,17 +39,22 @@ export async function runGenerationPipeline(
   // La voz lee el texto "humanizado": referencias como "6:17" se convierten
   // a "capítulo 6, versículo 17" para que NO las lea como una hora.
   const spokenText = humanizeForSpeech(script.fullText);
+  // Si el usuario eligió un fondo de la galería incluida, se usa directo
+  // (siempre disponible). Si no, se busca un video real en Pexels/Pixabay.
+  const useBundled = Boolean(req.bundledBackground);
   const [voice, background] = await Promise.all([
     generateVoice({
       text: spokenText,
       voiceId: req.voiceId,
       durationSec: req.durationSec,
     }),
-    findBackground({
-      query: req.backgroundQuery,
-      minDurationSec: req.durationSec,
-      seed,
-    }),
+    useBundled
+      ? Promise.resolve({ demo: false })
+      : findBackground({
+          query: req.backgroundQuery,
+          minDurationSec: req.durationSec,
+          seed,
+        }),
   ]);
 
   // Si hay audio real, súbelo a Storage para obtener URL pública (D-ID la necesita).
@@ -65,6 +70,17 @@ export async function runGenerationPipeline(
     const lipSync = await generateLipSync({ audioUrl });
     avatarVideoUrl = lipSync.avatarVideoUrl;
   }
+
+  // Resolver el fondo: galería incluida (SVG local) o resultado de Pexels.
+  const bg = background as {
+    demo: boolean;
+    videoUrl?: string;
+    imageUrl?: string;
+    posterUrl?: string;
+  };
+  const backgroundImageUrl = useBundled
+    ? `/backgrounds/${req.bundledBackground}.svg`
+    : bg.imageUrl;
 
   // La duración final del video se ajusta al audio real + respiro de cierre.
   const durationSec = voice.demo
@@ -97,9 +113,9 @@ export async function runGenerationPipeline(
       audioDurationSec: voice.audioDurationSec,
       voiceProvider: voice.provider,
       wordTimings: voice.wordTimings,
-      backgroundVideoUrl: background.videoUrl,
-      backgroundImageUrl: background.imageUrl,
-      backgroundPosterUrl: background.posterUrl,
+      backgroundVideoUrl: bg.videoUrl,
+      backgroundImageUrl,
+      backgroundPosterUrl: bg.posterUrl,
       avatarVideoUrl,
       musicUrl: process.env.NEXT_PUBLIC_MUSIC_URL || undefined,
     },

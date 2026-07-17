@@ -4,7 +4,7 @@ export const APP_NAME = "Versos que Impactan";
 export const APP_TAGLINE =
   "Videos con mensajes de Dios que tocan corazones — generados en un clic.";
 /** Versión visible en el pie de página: confirma qué build está desplegado. */
-export const APP_VERSION = "3.2";
+export const APP_VERSION = "3.3";
 
 /** Duraciones disponibles (segundos). */
 export const DURATIONS = [15, 30, 45, 60, 75, 90] as const;
@@ -49,6 +49,26 @@ export const BACKGROUNDS = [
   { id: "rio", label: "Río de montaña", query: "mountain river stream nature flowing" },
   { id: "velas", label: "Luz de velas", query: "candle light flame dark warm bokeh" },
 ] as const;
+
+/**
+ * 🖼️ GALERÍA INCLUIDA — fondos cinematográficos que viven DENTRO de la app
+ * (archivos en /public/backgrounds). SIEMPRE funcionan, sin clave ni internet.
+ * Se les aplica movimiento Ken Burns para que se sientan vivos.
+ */
+export const BUNDLED_BACKGROUNDS = [
+  { id: "montanas-amanecer", label: "Montañas al amanecer" },
+  { id: "oceano-dorado", label: "Océano dorado" },
+  { id: "cielo-celestial", label: "Sobre las nubes" },
+  { id: "noche-estrellada", label: "Cielo estrellado" },
+  { id: "bosque-rayos", label: "Bosque con luz" },
+  { id: "campo-dorado", label: "Campo al atardecer" },
+  { id: "cruz-colina", label: "Cruz en la colina" },
+  { id: "amatista", label: "Cielo de amatista" },
+] as const;
+
+export function bundledBackgroundUrl(id: string): string {
+  return `/backgrounds/${id}.svg`;
+}
 
 /** Estilos de texto animado (estética CapCut premium). */
 export const TEXT_STYLES: {
