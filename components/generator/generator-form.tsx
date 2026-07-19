@@ -334,7 +334,7 @@ export function GeneratorForm() {
                       : "border-border text-muted-foreground hover:border-gold/40"
                   )}
                 >
-                  🎬 Paisaje real en video (necesita clave Pexels)
+                  🎬 Fotos y videos reales (Pixabay — ya funciona)
                 </button>
               </div>
 

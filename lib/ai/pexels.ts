@@ -14,6 +14,17 @@ export interface BackgroundResult {
   demo: boolean;
 }
 
+/**
+ * Clave de Pixabay incluida por defecto para que las imágenes/videos
+ * funcionen sin configurar nada. La variable de entorno PIXABAY_API_KEY
+ * tiene prioridad (recomendado para producción). Puedes regenerarla en
+ * tu cuenta de Pixabay cuando quieras.
+ */
+const DEFAULT_PIXABAY_KEY = "56768257-44c1fba41772b4c25ef79cf85";
+function pixabayKey(): string {
+  return process.env.PIXABAY_API_KEY || DEFAULT_PIXABAY_KEY;
+}
+
 interface Candidate {
   videoUrl: string;
   posterUrl?: string;
@@ -66,8 +77,7 @@ async function searchPexels(query: string, minDurationSec: number): Promise<Cand
 }
 
 async function searchPixabay(query: string, minDurationSec: number): Promise<Candidate[]> {
-  const apiKey = process.env.PIXABAY_API_KEY;
-  if (!apiKey) return [];
+  const apiKey = pixabayKey();
   try {
     const url = new URL("https://pixabay.com/api/videos/");
     url.searchParams.set("key", apiKey);
@@ -112,7 +122,7 @@ async function searchPixabay(query: string, minDurationSec: number): Promise<Can
 async function searchPhotos(query: string): Promise<string[]> {
   const results: string[] = [];
   const pexelsKey = process.env.PEXELS_API_KEY;
-  const pixabayKey = process.env.PIXABAY_API_KEY;
+  const pixKey = pixabayKey();
   const unsplashKey = process.env.UNSPLASH_ACCESS_KEY;
 
   const tasks: Promise<void>[] = [];
@@ -134,12 +144,12 @@ async function searchPhotos(query: string): Promise<string[]> {
       })()
     );
   }
-  if (pixabayKey) {
+  if (pixKey) {
     tasks.push(
       (async () => {
         try {
           const url = new URL("https://pixabay.com/api/");
-          url.searchParams.set("key", pixabayKey);
+          url.searchParams.set("key", pixKey);
           url.searchParams.set("q", query);
           url.searchParams.set("orientation", "vertical");
           url.searchParams.set("per_page", "10");
