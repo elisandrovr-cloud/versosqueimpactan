@@ -10,6 +10,7 @@ import { VideoPlayer } from "@/components/preview/video-player";
 import { DownloadButton } from "@/components/preview/download-button";
 import { RegeneratePanel } from "@/components/preview/regenerate-panel";
 import { SharePanel } from "@/components/preview/share-panel";
+import { BrowserVoiceCard } from "@/components/preview/browser-voice-card";
 import { useProjectStore } from "@/lib/store";
 import { loadAudio } from "@/lib/audio-store";
 import { loadTrack } from "@/lib/music-store";
@@ -142,6 +143,8 @@ export function PreviewClient({ id }: { id: string }) {
           </Card>
 
           <DownloadButton project={project} />
+
+          <BrowserVoiceCard project={project} />
 
           <SharePanel project={project} />
 
