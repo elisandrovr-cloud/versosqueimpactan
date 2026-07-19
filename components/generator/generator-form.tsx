@@ -63,6 +63,7 @@ export function GeneratorForm() {
   const [customMessage, setCustomMessage] = useState("");
   const [manualVerse, setManualVerse] = useState(params.get("verso") ?? "");
   const [manualReference, setManualReference] = useState(params.get("ref") ?? "");
+  const [prayerNames, setPrayerNames] = useState("");
   const [duration, setDuration] = useState(30);
   const [voiceId, setVoiceId] = useState<string>(DEFAULT_VOICE_ID);
   const [textStyle, setTextStyle] = useState<TextStyleId>("elegante");
@@ -98,6 +99,7 @@ export function GeneratorForm() {
       durationSec: duration,
       voiceId,
       contentStyle,
+      prayerNames: prayerNames.trim() || undefined,
       aspect,
       captionMode,
       textStyle,
@@ -243,6 +245,21 @@ export function GeneratorForm() {
                 value={manualReference}
                 onChange={(e) => setManualReference(e.target.value)}
               />
+            </div>
+
+            <div className="space-y-2 rounded-lg border border-gold/30 bg-gold/5 p-4">
+              <Label className="flex items-center gap-2 text-sm">
+                🙏 Dedicar la oración a… (opcional)
+              </Label>
+              <Input
+                placeholder="Ej: mi mamá, Juan y María"
+                value={prayerNames}
+                onChange={(e) => setPrayerNames(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Se incluirá una oración por esa(s) persona(s) y un cierre
+                invitando a comentar para orar.
+              </p>
             </div>
           </CardContent>
         </Card>

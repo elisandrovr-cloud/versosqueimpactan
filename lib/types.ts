@@ -27,7 +27,7 @@ export type TextStyleId =
   | "cine";
 
 /** Qué tipo de contenido narra el video. */
-export type ContentStyle = "versiculo" | "historia" | "confrontacion";
+export type ContentStyle = "versiculo" | "historia" | "confrontacion" | "predica";
 
 /** Formato del lienzo según la plataforma destino. */
 export type AspectId = "9:16" | "1:1" | "16:9";
@@ -89,6 +89,8 @@ export interface VideoProject {
   voiceId: string;
   /** Tipo de contenido: versículo, historia épica o confrontación viral. */
   contentStyle?: ContentStyle;
+  /** Nombres para dedicar la oración. */
+  prayerNames?: string;
   /** Formato de plataforma: 9:16 (Shorts/TikTok), 1:1 (Facebook), 16:9 (YouTube). */
   aspect?: AspectId;
   /** Subtítulos por grupos de palabras o párrafo completo. */
@@ -111,6 +113,7 @@ export interface GenerateRequest {
   durationSec: number;
   voiceId: string;
   contentStyle?: ContentStyle;
+  prayerNames?: string;
   aspect?: AspectId;
   captionMode?: CaptionMode;
   textStyle: TextStyleId;

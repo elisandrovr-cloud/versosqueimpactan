@@ -32,6 +32,7 @@ export async function runGenerationPipeline(
     manualReference: req.manualReference,
     durationSec: req.durationSec,
     contentStyle: req.contentStyle,
+    prayerNames: req.prayerNames,
     seed,
   });
 
@@ -83,9 +84,10 @@ export async function runGenerationPipeline(
     : bg.imageUrl;
 
   // La duración final del video se ajusta al audio real + respiro de cierre.
+  // Tope 190s para permitir predicas largas (1-3 min).
   const durationSec = voice.demo
     ? req.durationSec
-    : Math.min(Math.max(voice.audioDurationSec + 1.5, 15), 95);
+    : Math.min(Math.max(voice.audioDurationSec + 1.5, 15), 190);
 
   return {
     id,
@@ -99,6 +101,7 @@ export async function runGenerationPipeline(
     script,
     voiceId: req.voiceId,
     contentStyle: req.contentStyle ?? "versiculo",
+    prayerNames: req.prayerNames,
     aspect: req.aspect ?? "9:16",
     captionMode: req.captionMode ?? "palabras",
     textStyle: req.textStyle,

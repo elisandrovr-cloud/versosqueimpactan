@@ -1,7 +1,45 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { VideoScript } from "../types";
+import type { ContentStyle, VideoScript } from "../types";
 import { NARRATION_WPS } from "../constants";
 import { buildDemoScript } from "../verse-bank";
+import { appendPrayer, buildSermonScript, fillToTarget } from "../sermon-bank";
+
+/**
+ * Construye el guion SIN IA (banco curado). Rutea a sermón para "predica",
+ * agrega la dedicación de oración cuando hay nombres, y para todos los
+ * estilos rellena hasta acercarse a la duración objetivo (arregla el bug
+ * de "siempre 23 segundos").
+ */
+function buildLocalScript(opts: {
+  topic: string;
+  durationSec: number;
+  seed?: number;
+  manualVerse?: string;
+  manualReference?: string;
+  style: ContentStyle;
+  prayerNames?: string;
+}): VideoScript {
+  const { topic, durationSec, seed, manualVerse, manualReference, style, prayerNames } = opts;
+  if (style === "predica") {
+    return buildSermonScript(topic, durationSec, seed ?? Date.now(), prayerNames);
+  }
+  let script = buildDemoScript(
+    topic,
+    durationSec,
+    seed,
+    manualVerse,
+    manualReference,
+    style
+  );
+  // Rellenar hasta la duración objetivo (arregla el bug de duración corta).
+  const filled = fillToTarget(script.fullText, durationSec, seed ?? 0);
+  script = { ...script, fullText: filled };
+  // Dedicación de oración + CTA si el usuario puso nombres.
+  if (prayerNames?.trim()) {
+    script = appendPrayer(script, prayerNames, true);
+  }
+  return script;
+}
 
 /**
  * Generación del guion con Claude: elige el versículo perfecto para el
@@ -14,22 +52,24 @@ export async function generateScript(opts: {
   manualVerse?: string;
   manualReference?: string;
   durationSec: number;
-  contentStyle?: "versiculo" | "historia" | "confrontacion";
+  contentStyle?: ContentStyle;
+  prayerNames?: string;
   seed?: number;
 }): Promise<{ script: VideoScript; demo: boolean }> {
-  const { topic, customMessage, manualVerse, manualReference, durationSec } = opts;
+  const { topic, customMessage, manualVerse, manualReference, durationSec, prayerNames } = opts;
   const style = opts.contentStyle ?? "versiculo";
 
   if (!process.env.ANTHROPIC_API_KEY) {
     return {
-      script: buildDemoScript(
+      script: buildLocalScript({
         topic,
         durationSec,
-        opts.seed,
+        seed: opts.seed,
         manualVerse,
         manualReference,
-        style
-      ),
+        style,
+        prayerNames,
+      }),
       demo: true,
     };
   }
@@ -56,7 +96,19 @@ ${durationSec <= 20 ? "- Solo el versículo y su referencia (video corto de impa
 - El versículo que respalda la verdad, con su referencia.
 - Cierre con un reto directo a comentar o etiquetar a alguien (esto dispara el algoritmo).
 - PROHIBIDO: atacar denominaciones, personas o pecados específicos de forma humillante.`,
+    predica: `ESTILO: PREDICA IMPACTANTE (sermón completo). Escribe un sermón poderoso y emotivo de ${durationSec} segundos:
+- INTRODUCCIÓN que conecte con el dolor o la necesidad de quien escucha.
+- El versículo base con su referencia.
+- 3 PUNTOS bíblicos claros, cada uno con su explicación y un ejemplo de la Biblia o de la vida real.
+- Una PARTE DE ORACIÓN dedicada${prayerNames?.trim() ? ` especialmente por: ${prayerNames}` : " por quien mira el video"}.
+- CIERRE fuerte y esperanzador.
+- Termina SIEMPRE con: "Comenta abajo si quieres que oremos por ti o por alguien más. ¡Dios te bendiga!"`,
   }[style];
+
+  const prayerInstruction =
+    prayerNames?.trim() && style !== "predica"
+      ? `\nDEDICACIÓN: Incluye cerca del final una oración dedicada por: ${prayerNames}. Y termina con "Comenta abajo si quieres que oremos por ti o por alguien más. ¡Dios te bendiga!"`
+      : "";
 
   const prompt = `Eres EXPERTO en marketing viral cristiano y guionista de los canales más exitosos del género (estilo @pastorleolopez, @oracionconia, @palabrasdelcreador5). Sabes que los primeros 2 segundos deciden si el video se ve completo, que la emoción genera compartidos y que las preguntas generan comentarios. Escribes en español latinoamericano, con calidez pastoral, como si Dios le hablara directamente a la persona que mira el video.
 
@@ -65,7 +117,7 @@ ${verseInstruction}
 
 DURACIÓN DEL VIDEO: ${durationSec} segundos → el guion narrado completo debe tener aproximadamente ${targetWords} palabras (ritmo pausado y emotivo). NO te pases de ${targetWords + 8} palabras.
 
-${styleInstructions}
+${styleInstructions}${prayerInstruction}
 
 Responde SOLO con JSON válido (sin markdown):
 {"verse": "texto del versículo", "reference": "Libro 0:0", "message": "la reflexión o clímax", "fullText": "guion narrado completo"}`;
@@ -73,7 +125,8 @@ Responde SOLO con JSON válido (sin markdown):
   try {
     const response = await client.messages.create({
       model: "claude-sonnet-5",
-      max_tokens: 1024,
+      // Las predicas largas necesitan más espacio de salida.
+      max_tokens: style === "predica" || durationSec > 60 ? 3000 : 1024,
       messages: [{ role: "user", content: prompt }],
     });
 
@@ -89,14 +142,15 @@ Responde SOLO con JSON válido (sin markdown):
   } catch (err) {
     console.error("[anthropic] fallo al generar guion, usando banco local:", err);
     return {
-      script: buildDemoScript(
+      script: buildLocalScript({
         topic,
         durationSec,
-        opts.seed,
+        seed: opts.seed,
         manualVerse,
         manualReference,
-        style
-      ),
+        style,
+        prayerNames,
+      }),
       demo: true,
     };
   }

@@ -4,12 +4,12 @@ export const APP_NAME = "Versos que Impactan";
 export const APP_TAGLINE =
   "Videos con mensajes de Dios que tocan corazones — generados en un clic.";
 /** Versión visible en el pie de página: confirma qué build está desplegado. */
-export const APP_VERSION = "3.5";
+export const APP_VERSION = "3.6";
 
 /** Duraciones disponibles (segundos). */
 export const DURATIONS = [15, 30, 45, 60, 75, 90] as const;
 export const MIN_DURATION = 15;
-export const MAX_DURATION = 90;
+export const MAX_DURATION = 180;
 export const FPS = 30;
 export const VIDEO_WIDTH = 1080;
 export const VIDEO_HEIGHT = 1920;
@@ -272,6 +272,12 @@ export const CONTENT_STYLES = [
     label: "Impacto viral",
     emoji: "🔥",
     description: "Preguntas que confrontan y encienden los comentarios",
+  },
+  {
+    id: "predica",
+    label: "Predica impactante",
+    emoji: "🎤",
+    description: "Sermón completo: intro, puntos bíblicos y cierre poderoso (1-3 min)",
   },
 ] as const;
 

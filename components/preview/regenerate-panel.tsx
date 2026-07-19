@@ -39,6 +39,7 @@ export function RegeneratePanel({ project }: { project: VideoProject }) {
       manualReference: project.manualReference,
       durationSec: Math.round(project.durationSec / 5) * 5,
       contentStyle: project.contentStyle,
+      prayerNames: project.prayerNames,
       aspect: project.aspect,
       captionMode: project.captionMode,
       voiceId:
