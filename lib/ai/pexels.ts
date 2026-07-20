@@ -25,6 +25,12 @@ function pixabayKey(): string {
   return process.env.PIXABAY_API_KEY || DEFAULT_PIXABAY_KEY;
 }
 
+/** Clave de Pexels incluida por defecto (env PEXELS_API_KEY tiene prioridad). */
+const DEFAULT_PEXELS_KEY = "s9X3uE1P19YUal1dpXPekLqgrcL4Gn9xdiDvvVM7hcZArD107pFp6AS";
+function pexelsKey(): string {
+  return process.env.PEXELS_API_KEY || DEFAULT_PEXELS_KEY;
+}
+
 interface Candidate {
   videoUrl: string;
   posterUrl?: string;
@@ -40,8 +46,7 @@ interface PexelsVideoFile {
 }
 
 async function searchPexels(query: string, minDurationSec: number): Promise<Candidate[]> {
-  const apiKey = process.env.PEXELS_API_KEY;
-  if (!apiKey) return [];
+  const apiKey = pexelsKey();
   try {
     const url = new URL("https://api.pexels.com/videos/search");
     url.searchParams.set("query", query);
@@ -121,12 +126,12 @@ async function searchPixabay(query: string, minDurationSec: number): Promise<Can
 /** Fotos de respaldo: Pexels Photos + Pixabay Images + Unsplash. */
 async function searchPhotos(query: string): Promise<string[]> {
   const results: string[] = [];
-  const pexelsKey = process.env.PEXELS_API_KEY;
+  const pexKey = pexelsKey();
   const pixKey = pixabayKey();
   const unsplashKey = process.env.UNSPLASH_ACCESS_KEY;
 
   const tasks: Promise<void>[] = [];
-  if (pexelsKey) {
+  if (pexKey) {
     tasks.push(
       (async () => {
         try {
@@ -134,7 +139,7 @@ async function searchPhotos(query: string): Promise<string[]> {
           url.searchParams.set("query", query);
           url.searchParams.set("orientation", "portrait");
           url.searchParams.set("per_page", "10");
-          const res = await fetch(url, { headers: { Authorization: pexelsKey } });
+          const res = await fetch(url, { headers: { Authorization: pexKey } });
           if (!res.ok) return;
           const data = (await res.json()) as { photos: { src: { large2x: string } }[] };
           results.push(...data.photos.map((p) => p.src.large2x));
