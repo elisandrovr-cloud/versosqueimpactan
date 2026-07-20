@@ -72,19 +72,25 @@ export function speakText(opts: {
     opts.onEnd?.();
     return { stop: () => {} };
   }
-  window.speechSynthesis.cancel(); // detener lo anterior
+  const synth = window.speechSynthesis;
+  synth.cancel(); // detener lo anterior
 
   const u = new SpeechSynthesisUtterance(opts.text);
-  u.lang = "es-MX";
   u.rate = opts.rate ?? 0.95; // un poco pausado = más emotivo
   u.pitch = opts.pitch ?? 1;
 
-  const voices = window.speechSynthesis.getVoices();
+  const voices = synth.getVoices();
   const chosen =
     (opts.voiceName && voices.find((v) => v.name === opts.voiceName)) ||
     voices.find((v) => v.lang.toLowerCase().startsWith("es")) ||
     voices[0];
-  if (chosen) u.voice = chosen;
+  // IMPORTANTE: asignar la voz Y su idioma propio. Si se fija un lang
+  // distinto (ej. "es-MX" fijo), muchos navegadores IGNORAN u.voice y usan
+  // su voz por defecto → ese era el bug de "solo suena la voz de la mujer".
+  if (chosen) {
+    u.voice = chosen;
+    u.lang = chosen.lang;
+  }
 
   if (opts.onWord) {
     u.onboundary = (e) => {
@@ -92,10 +98,20 @@ export function speakText(opts: {
     };
   }
   u.onend = () => opts.onEnd?.();
-  window.speechSynthesis.speak(u);
+
+  // Chrome a veces ignora speak() si se llama inmediatamente tras cancel().
+  // Un pequeño respiro asegura que la voz elegida se aplique de verdad.
+  setTimeout(() => {
+    // Reasignar por si getVoices tardó en poblarse.
+    if (chosen) {
+      u.voice = chosen;
+      u.lang = chosen.lang;
+    }
+    synth.speak(u);
+  }, 60);
 
   return {
-    stop: () => window.speechSynthesis.cancel(),
+    stop: () => synth.cancel(),
   };
 }
 
