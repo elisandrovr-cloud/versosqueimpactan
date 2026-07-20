@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { VideoPlayer } from "@/components/preview/video-player";
 import { DownloadButton } from "@/components/preview/download-button";
+import { ShareVideoButton } from "@/components/preview/share-video-button";
 import { RegeneratePanel } from "@/components/preview/regenerate-panel";
 import { SharePanel } from "@/components/preview/share-panel";
 import { BrowserVoiceCard } from "@/components/preview/browser-voice-card";
@@ -143,6 +144,8 @@ export function PreviewClient({ id }: { id: string }) {
           </Card>
 
           <DownloadButton project={project} />
+
+          <ShareVideoButton project={project} />
 
           <BrowserVoiceCard project={project} />
 
