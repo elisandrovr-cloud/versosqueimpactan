@@ -47,6 +47,7 @@ import { useProjectStore } from "@/lib/store";
 import { saveAudio } from "@/lib/audio-store";
 import { loadTrack } from "@/lib/music-store";
 import { fixProjectSync } from "@/lib/client-audio";
+import { ensureVoice } from "@/lib/client-tts";
 import { formatDuration, cn } from "@/lib/utils";
 
 export function GeneratorForm() {
@@ -120,6 +121,9 @@ export function GeneratorForm() {
         throw new Error(data?.error ?? `Error ${res.status}`);
       }
       let project = (await res.json()) as VideoProject;
+      // 🎙️ Si el servidor no generó voz (bloqueo de Vercel), generarla en el
+      // navegador (IP residencial sí alcanza el servicio). Arregla el video mudo.
+      project = await ensureVoice(project);
       // Corregir la sincronización con la duración REAL del audio.
       project = await fixProjectSync(project);
       // Adjuntar la música elegida (guardada en el navegador).

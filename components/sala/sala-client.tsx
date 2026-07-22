@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useProjectStore } from "@/lib/store";
 import { saveAudio } from "@/lib/audio-store";
 import { fixProjectSync } from "@/lib/client-audio";
+import { ensureVoice } from "@/lib/client-tts";
 import { dailyRequests, dayKey, todayLabel } from "@/lib/daily";
 import { formatDuration } from "@/lib/utils";
 import type { VideoProject } from "@/lib/types";
@@ -53,6 +54,7 @@ export function SalaClient() {
           let project = (await res.json()) as VideoProject;
           // Marcar como video del día (id estable por fecha).
           project = { ...project, id: `${tag}${i}` };
+          project = await ensureVoice(project);
           project = await fixProjectSync(project);
           if (project.assets.audioUrl?.startsWith("data:")) {
             await saveAudio(project.id, project.assets.audioUrl);

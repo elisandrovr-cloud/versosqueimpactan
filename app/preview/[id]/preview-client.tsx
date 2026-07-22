@@ -23,6 +23,7 @@ const VOICE_LABELS: Record<VoiceProvider, string> = {
   openai: "🎙️ Voz OpenAI Premium",
   edge: "🎙️ Voz neuronal (gratis)",
   google: "🎙️ Voz estándar (gratis)",
+  navegador: "🎙️ Voz del navegador (gratis)",
   none: "🔇 Sin voz",
 };
 

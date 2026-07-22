@@ -36,7 +36,13 @@ export type AspectId = "9:16" | "1:1" | "16:9";
 export type CaptionMode = "palabras" | "parrafo";
 
 /** Qué motor generó la voz en off. */
-export type VoiceProvider = "elevenlabs" | "openai" | "edge" | "google" | "none";
+export type VoiceProvider =
+  | "elevenlabs"
+  | "openai"
+  | "edge"
+  | "google"
+  | "navegador"
+  | "none";
 
 export type ProjectStatus = "draft" | "generating" | "ready" | "error";
 

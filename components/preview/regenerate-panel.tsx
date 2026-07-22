@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useProjectStore } from "@/lib/store";
 import { saveAudio } from "@/lib/audio-store";
 import { fixProjectSync } from "@/lib/client-audio";
+import { ensureVoice } from "@/lib/client-tts";
 import { BACKGROUNDS, TEXT_STYLES, VOICES } from "@/lib/constants";
 import type { GenerateRequest, VideoProject } from "@/lib/types";
 
@@ -67,6 +68,7 @@ export function RegeneratePanel({ project }: { project: VideoProject }) {
       });
       if (!res.ok) throw new Error(`Error ${res.status}`);
       let newProject = (await res.json()) as VideoProject;
+      newProject = await ensureVoice(newProject);
       newProject = await fixProjectSync(newProject);
       if (newProject.assets.audioUrl?.startsWith("data:")) {
         await saveAudio(newProject.id, newProject.assets.audioUrl);
