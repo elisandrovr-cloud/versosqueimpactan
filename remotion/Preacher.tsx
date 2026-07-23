@@ -1,17 +1,19 @@
 import React, { useMemo } from "react";
 import { Img, useCurrentFrame, useVideoConfig, spring } from "remotion";
 import type { WordTiming } from "@/lib/types";
-import { mouthOpenAt, preacherDataUri } from "@/lib/preacher";
+import { mouthOpenAt, preacherDataUri, preacherRect } from "@/lib/preacher";
 
 /**
  * Caricatura predicadora que "habla" el guion: la boca se sincroniza con la
- * voz (wordTimings). Aparece en la parte inferior, con un leve balanceo de
- * cabeza para que se sienta vivo. Se dibuja igual en la descarga (canvas).
+ * voz (wordTimings). Se coloca en la posición elegida por el usuario, con un
+ * leve balanceo de cabeza para sentirse viva. Se dibuja IGUAL en la descarga
+ * (canvas), usando la misma función `preacherRect` para la posición.
  */
 export const Preacher: React.FC<{
   avatarId: string;
   wordTimings: WordTiming[];
-}> = ({ avatarId, wordTimings }) => {
+  position?: string;
+}> = ({ avatarId, wordTimings, position }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
   const t = frame / fps;
@@ -21,18 +23,19 @@ export const Preacher: React.FC<{
   const uriOpen = useMemo(() => preacherDataUri(avatarId, true), [avatarId]);
 
   const enter = spring({ frame, fps, config: { damping: 200 } });
-  const bob = Math.sin(t * 3) * 6; // balanceo suave
-  const w = Math.min(width, height) * 0.42;
+  const bob = Math.sin(t * 3) * 6; // balanceo suave de cabeza
+  const rect = preacherRect(position, width, height);
 
   return (
     <Img
       src={open ? uriOpen : uriClosed}
       style={{
         position: "absolute",
-        bottom: height * 0.02,
-        left: "50%",
-        width: w,
-        transform: `translateX(-50%) translateY(${(1 - enter) * 60 + bob}px)`,
+        left: rect.x,
+        top: rect.y,
+        width: rect.w,
+        height: rect.h,
+        transform: `translateY(${(1 - enter) * 60 + bob}px)`,
         filter: "drop-shadow(0 10px 24px rgba(0,0,0,0.5))",
       }}
     />

@@ -43,7 +43,7 @@ import type {
   VideoProject,
   WatermarkConfig,
 } from "@/lib/types";
-import { PREACHERS } from "@/lib/preacher";
+import { PREACHERS, PREACHER_POSITIONS } from "@/lib/preacher";
 import { useProjectStore } from "@/lib/store";
 import { saveAudio } from "@/lib/audio-store";
 import { loadTrack } from "@/lib/music-store";
@@ -76,6 +76,7 @@ export function GeneratorForm() {
   const [captionMode, setCaptionMode] = useState<CaptionMode>("palabras");
   // Caricatura predicadora: "off" o el id del personaje (pastor-joven, etc.).
   const [cartoonAvatar, setCartoonAvatar] = useState<string>("off");
+  const [cartoonPosition, setCartoonPosition] = useState<string>("abajo-centro");
   const [musicTrackId, setMusicTrackId] = useState<string | null>(null);
   const includeAvatar = false;
   const [watermark, setWatermark] = useState<WatermarkConfig>({
@@ -107,6 +108,7 @@ export function GeneratorForm() {
       aspect,
       captionMode,
       cartoonAvatar: cartoonAvatar !== "off" ? cartoonAvatar : undefined,
+      cartoonPosition: cartoonAvatar !== "off" ? cartoonPosition : undefined,
       textStyle,
       backgroundQuery: background.query,
       bundledBackground: bgSource === "galeria" ? bundledBg : undefined,
@@ -512,31 +514,59 @@ export function GeneratorForm() {
               </div>
 
               {cartoonAvatar !== "off" && (
-                <div className="grid grid-cols-3 gap-2">
-                  {PREACHERS.map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => setCartoonAvatar(p.id)}
-                      className={cn(
-                        "rounded-lg border p-3 text-center transition-all",
-                        cartoonAvatar === p.id
-                          ? "border-gold bg-gold/15 shadow-[0_0_16px_-6px_rgba(212,175,55,0.4)]"
-                          : "border-border hover:border-gold/40"
-                      )}
-                    >
-                      <span className="block text-2xl">{p.emoji}</span>
-                      <span
+                <>
+                  <div className="grid grid-cols-3 gap-2">
+                    {PREACHERS.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setCartoonAvatar(p.id)}
                         className={cn(
-                          "mt-1 block text-xs font-semibold",
-                          cartoonAvatar === p.id ? "text-gold-light" : "text-foreground"
+                          "rounded-lg border p-3 text-center transition-all",
+                          cartoonAvatar === p.id
+                            ? "border-gold bg-gold/15 shadow-[0_0_16px_-6px_rgba(212,175,55,0.4)]"
+                            : "border-border hover:border-gold/40"
                         )}
                       >
-                        {p.label}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+                        <span className="block text-2xl">{p.emoji}</span>
+                        <span
+                          className={cn(
+                            "mt-1 block text-xs font-semibold",
+                            cartoonAvatar === p.id ? "text-gold-light" : "text-foreground"
+                          )}
+                        >
+                          {p.label}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Posición de la caricatura en la pantalla */}
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground">
+                      Posición en el video
+                    </p>
+                    <div className="grid grid-cols-4 gap-2">
+                      {PREACHER_POSITIONS.map((pos) => (
+                        <button
+                          key={pos.id}
+                          type="button"
+                          onClick={() => setCartoonPosition(pos.id)}
+                          title={pos.label}
+                          className={cn(
+                            "rounded-lg border px-2 py-2 text-center text-[11px] leading-tight transition-all",
+                            cartoonPosition === pos.id
+                              ? "border-gold bg-gold/15 text-gold-light"
+                              : "border-border text-muted-foreground hover:border-gold/40"
+                          )}
+                        >
+                          <span className="block text-base">{pos.emoji}</span>
+                          {pos.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
               )}
             </div>
           </CardContent>

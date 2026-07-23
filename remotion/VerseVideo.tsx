@@ -30,6 +30,7 @@ export const VerseVideo: React.FC<VerseVideoProps> = ({
   textStyle,
   captionMode,
   cartoonAvatar,
+  cartoonPosition,
   backgroundVideoUrl,
   backgroundImageUrl,
   audioUrl,
@@ -107,7 +108,11 @@ export const VerseVideo: React.FC<VerseVideoProps> = ({
 
         {/* Caricatura predicadora que habla (lip sync) */}
         {cartoonAvatar && cartoonAvatar !== "off" ? (
-          <Preacher avatarId={cartoonAvatar} wordTimings={wordTimings} />
+          <Preacher
+            avatarId={cartoonAvatar}
+            wordTimings={wordTimings}
+            position={cartoonPosition}
+          />
         ) : null}
 
         {/* Avatar con lip sync (D-ID, opcional) */}

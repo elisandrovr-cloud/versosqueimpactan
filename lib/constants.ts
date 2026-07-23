@@ -4,7 +4,7 @@ export const APP_NAME = "Versos que Impactan";
 export const APP_TAGLINE =
   "Videos con mensajes de Dios que tocan corazones — generados en un clic.";
 /** Versión visible en el pie de página: confirma qué build está desplegado. */
-export const APP_VERSION = "4.2";
+export const APP_VERSION = "4.3";
 
 /** Duraciones disponibles (segundos). */
 export const DURATIONS = [15, 30, 45, 60, 75, 90] as const;
@@ -137,11 +137,21 @@ export const TEXT_STYLES: {
 ];
 
 /**
- * Voces masculinas en español latino. Por defecto usan Microsoft Edge TTS
- * (neuronal, GRATIS y sin clave). Si configuras ELEVENLABS_API_KEY, la app
- * usa automáticamente la voz equivalente de ElevenLabs (aún más realista).
- *  - `edge`: nombre de la voz neuronal gratuita.
- *  - `eleven`: ID de la voz equivalente en ElevenLabs (opcional, de pago).
+ * Voces en español latino. Por defecto usan Microsoft Edge TTS (neuronal,
+ * GRATIS y sin clave); si configuras ELEVENLABS_API_KEY, la app usa la voz
+ * equivalente de ElevenLabs. En Vercel el servidor no alcanza esos servicios,
+ * así que la voz se genera en el navegador con StreamElements (Amazon Polly):
+ *  - `edge`  : voz neuronal gratuita (servidor / local).
+ *  - `eleven`: ID equivalente en ElevenLabs (opcional, de pago).
+ *  - `polly` : voz BASE de Amazon Polly usada en el navegador (StreamElements).
+ *  - `rate`  : transformación de tono/velocidad que se HORNEA en el audio para
+ *              que cada voz suene DISTINTA aunque compartan la base de Polly
+ *              (<1 = más grave y pausada; >1 = más aguda y ágil). También
+ *              ajusta el ritmo de la boca de la caricatura (lip sync).
+ *
+ * Polly solo ofrece 2 voces masculinas y varias femeninas en español, por eso
+ * varias voces comparten base y se diferencian con `rate`. Con una clave de
+ * ElevenLabs cada voz sería un actor distinto de estudio.
  */
 export const VOICES = [
   {
@@ -151,6 +161,8 @@ export const VOICES = [
     edge: "es-MX-JorgeNeural",
     eleven: "onwK4e9ZLuTAKqWW03F9",
     openai: "onyx",
+    polly: "Miguel",
+    rate: 1.0,
   },
   {
     id: "alonso",
@@ -159,6 +171,8 @@ export const VOICES = [
     edge: "es-US-AlonsoNeural",
     eleven: "TX3LPaxmHKxFdv7VOQHJ",
     openai: "echo",
+    polly: "Miguel",
+    rate: 1.08,
   },
   {
     id: "gonzalo",
@@ -167,6 +181,8 @@ export const VOICES = [
     edge: "es-CO-GonzaloNeural",
     eleven: "pqHfZKP75CvOlQylNhV4",
     openai: "ash",
+    polly: "Enrique",
+    rate: 0.92,
   },
   {
     id: "tomas",
@@ -175,6 +191,8 @@ export const VOICES = [
     edge: "es-AR-TomasNeural",
     eleven: "onwK4e9ZLuTAKqWW03F9",
     openai: "onyx",
+    polly: "Miguel",
+    rate: 1.13,
   },
   {
     id: "lorenzo",
@@ -183,6 +201,8 @@ export const VOICES = [
     edge: "es-CL-LorenzoNeural",
     eleven: "TX3LPaxmHKxFdv7VOQHJ",
     openai: "echo",
+    polly: "Enrique",
+    rate: 1.07,
   },
   {
     id: "alvaro",
@@ -191,6 +211,8 @@ export const VOICES = [
     edge: "es-ES-AlvaroNeural",
     eleven: "pqHfZKP75CvOlQylNhV4",
     openai: "onyx",
+    polly: "Enrique",
+    rate: 0.98,
   },
   {
     id: "dalia",
@@ -199,6 +221,8 @@ export const VOICES = [
     edge: "es-MX-DaliaNeural",
     eleven: "EXAVITQu4vr4xnSDxMaL",
     openai: "nova",
+    polly: "Mia",
+    rate: 1.0,
   },
   {
     id: "salome",
@@ -207,6 +231,8 @@ export const VOICES = [
     edge: "es-CO-SalomeNeural",
     eleven: "EXAVITQu4vr4xnSDxMaL",
     openai: "shimmer",
+    polly: "Penelope",
+    rate: 1.04,
   },
 ] as const;
 

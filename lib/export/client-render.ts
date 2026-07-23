@@ -3,7 +3,7 @@
 import type { SocialNetwork, VideoProject } from "../types";
 import { FPS, resolveFormat } from "../constants";
 import { activePage, captionFontSize, getPages, getTextStyle } from "../captions";
-import { mouthOpenAt, preacherDataUri } from "../preacher";
+import { mouthOpenAt, preacherDataUri, preacherRect } from "../preacher";
 
 /**
  * 🎬 EXPORTADOR EN EL NAVEGADOR — descarga garantizada en cualquier hosting.
@@ -380,19 +380,18 @@ function drawFrame(
   if (preacher) {
     const open = mouthOpenAt(project.assets.wordTimings, t);
     const img = open ? preacher.open : preacher.closed;
-    const pw = Math.min(W, H) * 0.42;
-    const ph = pw * (460 / 360); // proporción del SVG (360x460)
+    // Misma posición/tamaño que la vista previa (preacherRect compartido).
+    const r = preacherRect(project.cartoonPosition, W, H);
     // Entrada suave (easeOutCubic ~0.6s) + balanceo de cabeza.
     const enter = 1 - Math.pow(1 - Math.min(t / 0.6, 1), 3);
-    const bob = Math.sin(t * 3) * 6 * s;
-    const px = (W - pw) / 2;
-    const py = H - H * 0.02 - ph + (1 - enter) * 60 * s + bob;
+    const bob = Math.sin(t * 3) * 6;
+    const py = r.y + (1 - enter) * 60 + bob;
     ctx.save();
     ctx.globalAlpha = enter;
     ctx.shadowColor = "rgba(0,0,0,0.5)";
     ctx.shadowBlur = 24 * s;
     ctx.shadowOffsetY = 10 * s;
-    ctx.drawImage(img, px, py, pw, ph);
+    ctx.drawImage(img, r.x, py, r.w, r.h);
     ctx.restore();
   }
 

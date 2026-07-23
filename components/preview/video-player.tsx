@@ -14,6 +14,7 @@ export function projectToProps(project: VideoProject): VerseVideoProps {
     textStyle: project.textStyle,
     captionMode: project.captionMode ?? "palabras",
     cartoonAvatar: project.cartoonAvatar,
+    cartoonPosition: project.cartoonPosition,
     backgroundVideoUrl: project.assets.backgroundVideoUrl,
     backgroundImageUrl: project.assets.backgroundImageUrl,
     audioUrl: project.assets.audioUrl,

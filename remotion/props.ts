@@ -16,6 +16,8 @@ export interface VerseVideoProps extends Record<string, unknown> {
   captionMode?: CaptionMode;
   /** Caricatura predicadora (id) que habla el guion, o undefined. */
   cartoonAvatar?: string;
+  /** Posición de la caricatura en el video (abajo-centro, centro, etc.). */
+  cartoonPosition?: string;
   backgroundVideoUrl?: string;
   backgroundImageUrl?: string;
   audioUrl?: string;

@@ -75,6 +75,7 @@ export async function POST(req: NextRequest) {
       textStyle: project.textStyle,
       captionMode: project.captionMode ?? "palabras",
       cartoonAvatar: project.cartoonAvatar,
+      cartoonPosition: project.cartoonPosition,
       backgroundVideoUrl: project.assets.backgroundVideoUrl,
       backgroundImageUrl: project.assets.backgroundImageUrl,
       audioUrl: project.assets.audioUrl,

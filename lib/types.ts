@@ -99,6 +99,8 @@ export interface VideoProject {
   prayerNames?: string;
   /** Caricatura predicadora que habla (id) o "off". */
   cartoonAvatar?: string;
+  /** Posición de la caricatura (abajo-centro, centro, arriba-der, etc.). */
+  cartoonPosition?: string;
   /** Formato de plataforma: 9:16 (Shorts/TikTok), 1:1 (Facebook), 16:9 (YouTube). */
   aspect?: AspectId;
   /** Subtítulos por grupos de palabras o párrafo completo. */
@@ -123,6 +125,7 @@ export interface GenerateRequest {
   contentStyle?: ContentStyle;
   prayerNames?: string;
   cartoonAvatar?: string;
+  cartoonPosition?: string;
   aspect?: AspectId;
   captionMode?: CaptionMode;
   textStyle: TextStyleId;

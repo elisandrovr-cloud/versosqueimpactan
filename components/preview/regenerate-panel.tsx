@@ -44,6 +44,7 @@ export function RegeneratePanel({ project }: { project: VideoProject }) {
       aspect: project.aspect,
       captionMode: project.captionMode,
       cartoonAvatar: project.cartoonAvatar,
+      cartoonPosition: project.cartoonPosition,
       voiceId:
         variation === "voz" || variation === "todo"
           ? pickDifferent(VOICES as unknown as { id: string }[], project.voiceId).id
