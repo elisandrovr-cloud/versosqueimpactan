@@ -14,6 +14,8 @@ export interface VerseVideoProps extends Record<string, unknown> {
   wordTimings: WordTiming[];
   textStyle: TextStyleId;
   captionMode?: CaptionMode;
+  /** Caricatura predicadora (id) que habla el guion, o undefined. */
+  cartoonAvatar?: string;
   backgroundVideoUrl?: string;
   backgroundImageUrl?: string;
   audioUrl?: string;

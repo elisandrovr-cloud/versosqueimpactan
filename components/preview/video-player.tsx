@@ -13,6 +13,7 @@ export function projectToProps(project: VideoProject): VerseVideoProps {
     wordTimings: project.assets.wordTimings,
     textStyle: project.textStyle,
     captionMode: project.captionMode ?? "palabras",
+    cartoonAvatar: project.cartoonAvatar,
     backgroundVideoUrl: project.assets.backgroundVideoUrl,
     backgroundImageUrl: project.assets.backgroundImageUrl,
     audioUrl: project.assets.audioUrl,

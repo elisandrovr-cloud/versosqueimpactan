@@ -3,6 +3,7 @@
 import type { SocialNetwork, VideoProject } from "../types";
 import { FPS, resolveFormat } from "../constants";
 import { activePage, captionFontSize, getPages, getTextStyle } from "../captions";
+import { mouthOpenAt, preacherDataUri } from "../preacher";
 
 /**
  * 🎬 EXPORTADOR EN EL NAVEGADOR — descarga garantizada en cualquier hosting.
@@ -103,6 +104,29 @@ async function loadBackgroundImage(url?: string): Promise<HTMLImageElement | nul
   return null;
 }
 
+/** Pareja de imágenes (boca abierta/cerrada) de la caricatura predicadora. */
+interface PreacherImages {
+  open: HTMLImageElement;
+  closed: HTMLImageElement;
+}
+
+/** Precarga la caricatura predicadora (SVG → Image) para dibujarla en canvas. */
+async function loadPreacher(avatarId?: string): Promise<PreacherImages | null> {
+  if (!avatarId || avatarId === "off") return null;
+  try {
+    const load = async (open: boolean) => {
+      const img = new Image();
+      img.src = preacherDataUri(avatarId, open);
+      await img.decode();
+      return img;
+    };
+    const [open, closed] = await Promise.all([load(true), load(false)]);
+    return { open, closed };
+  } catch {
+    return null;
+  }
+}
+
 function seekTo(video: HTMLVideoElement, t: number): Promise<void> {
   return new Promise((resolve) => {
     const target = Math.min(t, Math.max(video.duration - 0.05, 0));
@@ -195,6 +219,7 @@ function drawFrame(
   totalSec: number,
   bgVideo: HTMLVideoElement | null,
   bgImage: HTMLImageElement | null,
+  preacher: PreacherImages | null,
   seed: number
 ) {
   const W = ctx.canvas.width;
@@ -351,6 +376,26 @@ function drawFrame(
     ctx.globalAlpha = 1;
   }
 
+  // ---- Caricatura predicadora (lip sync) ----
+  if (preacher) {
+    const open = mouthOpenAt(project.assets.wordTimings, t);
+    const img = open ? preacher.open : preacher.closed;
+    const pw = Math.min(W, H) * 0.42;
+    const ph = pw * (460 / 360); // proporción del SVG (360x460)
+    // Entrada suave (easeOutCubic ~0.6s) + balanceo de cabeza.
+    const enter = 1 - Math.pow(1 - Math.min(t / 0.6, 1), 3);
+    const bob = Math.sin(t * 3) * 6 * s;
+    const px = (W - pw) / 2;
+    const py = H - H * 0.02 - ph + (1 - enter) * 60 * s + bob;
+    ctx.save();
+    ctx.globalAlpha = enter;
+    ctx.shadowColor = "rgba(0,0,0,0.5)";
+    ctx.shadowBlur = 24 * s;
+    ctx.shadowOffsetY = 10 * s;
+    ctx.drawImage(img, px, py, pw, ph);
+    ctx.restore();
+  }
+
   // ---- Marca de agua ----
   const wm = project.watermark;
   if (wm.enabled && wm.handle && t > 1.2) {
@@ -421,11 +466,12 @@ export async function exportVideoInBrowser(
   const codec = await pickVideoCodec(W, H);
   await document.fonts.ready;
 
-  const [bgVideo, bgImage, audioBuffer] = await Promise.all([
+  const [bgVideo, bgImage, preacher, audioBuffer] = await Promise.all([
     loadBackgroundVideo(project.assets.backgroundVideoUrl),
     loadBackgroundImage(
       project.assets.backgroundVideoUrl ? undefined : project.assets.backgroundImageUrl
     ),
+    loadPreacher(project.cartoonAvatar),
     (onProgress({ phase: "audio", pct: 6 }), renderAudioMix(project, durationSec)),
   ]);
 
@@ -512,7 +558,7 @@ export async function exportVideoInBrowser(
     if (encodeError) throw encodeError;
     const t = f / FPS;
     if (bgVideo) await seekTo(bgVideo, t % bgVideo.duration);
-    drawFrame(ctx, project, t, durationSec, bgVideo, bgImage, seed);
+    drawFrame(ctx, project, t, durationSec, bgVideo, bgImage, preacher, seed);
     const frame = new VideoFrame(canvas, {
       timestamp: Math.round(t * 1e6),
       duration: Math.round(1e6 / FPS),

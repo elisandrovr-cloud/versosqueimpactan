@@ -43,6 +43,7 @@ import type {
   VideoProject,
   WatermarkConfig,
 } from "@/lib/types";
+import { PREACHERS } from "@/lib/preacher";
 import { useProjectStore } from "@/lib/store";
 import { saveAudio } from "@/lib/audio-store";
 import { loadTrack } from "@/lib/music-store";
@@ -73,6 +74,8 @@ export function GeneratorForm() {
   const [bundledBg, setBundledBg] = useState<string>(BUNDLED_BACKGROUNDS[0].id);
   const [aspect, setAspect] = useState<AspectId>("9:16");
   const [captionMode, setCaptionMode] = useState<CaptionMode>("palabras");
+  // Caricatura predicadora: "off" o el id del personaje (pastor-joven, etc.).
+  const [cartoonAvatar, setCartoonAvatar] = useState<string>("off");
   const [musicTrackId, setMusicTrackId] = useState<string | null>(null);
   const includeAvatar = false;
   const [watermark, setWatermark] = useState<WatermarkConfig>({
@@ -103,6 +106,7 @@ export function GeneratorForm() {
       prayerNames: prayerNames.trim() || undefined,
       aspect,
       captionMode,
+      cartoonAvatar: cartoonAvatar !== "off" ? cartoonAvatar : undefined,
       textStyle,
       backgroundQuery: background.query,
       bundledBackground: bgSource === "galeria" ? bundledBg : undefined,
@@ -474,6 +478,66 @@ export function GeneratorForm() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Caricatura predicadora que habla el mensaje (lip sync) */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>🧑‍🏫 Caricatura predicadora</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Un personaje cristiano animado predica tu mensaje; la boca
+                    se sincroniza con la voz.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={cartoonAvatar !== "off"}
+                  onClick={() =>
+                    setCartoonAvatar((c) => (c === "off" ? PREACHERS[0].id : "off"))
+                  }
+                  className={cn(
+                    "relative h-6 w-11 shrink-0 rounded-full transition-colors",
+                    cartoonAvatar !== "off" ? "bg-gold" : "bg-secondary"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform",
+                      cartoonAvatar !== "off" ? "translate-x-[22px]" : "translate-x-0.5"
+                    )}
+                  />
+                </button>
+              </div>
+
+              {cartoonAvatar !== "off" && (
+                <div className="grid grid-cols-3 gap-2">
+                  {PREACHERS.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => setCartoonAvatar(p.id)}
+                      className={cn(
+                        "rounded-lg border p-3 text-center transition-all",
+                        cartoonAvatar === p.id
+                          ? "border-gold bg-gold/15 shadow-[0_0_16px_-6px_rgba(212,175,55,0.4)]"
+                          : "border-border hover:border-gold/40"
+                      )}
+                    >
+                      <span className="block text-2xl">{p.emoji}</span>
+                      <span
+                        className={cn(
+                          "mt-1 block text-xs font-semibold",
+                          cartoonAvatar === p.id ? "text-gold-light" : "text-foreground"
+                        )}
+                      >
+                        {p.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

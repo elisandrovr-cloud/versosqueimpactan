@@ -97,6 +97,8 @@ export interface VideoProject {
   contentStyle?: ContentStyle;
   /** Nombres para dedicar la oración. */
   prayerNames?: string;
+  /** Caricatura predicadora que habla (id) o "off". */
+  cartoonAvatar?: string;
   /** Formato de plataforma: 9:16 (Shorts/TikTok), 1:1 (Facebook), 16:9 (YouTube). */
   aspect?: AspectId;
   /** Subtítulos por grupos de palabras o párrafo completo. */
@@ -120,6 +122,7 @@ export interface GenerateRequest {
   voiceId: string;
   contentStyle?: ContentStyle;
   prayerNames?: string;
+  cartoonAvatar?: string;
   aspect?: AspectId;
   captionMode?: CaptionMode;
   textStyle: TextStyleId;

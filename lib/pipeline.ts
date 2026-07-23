@@ -102,6 +102,7 @@ export async function runGenerationPipeline(
     voiceId: req.voiceId,
     contentStyle: req.contentStyle ?? "versiculo",
     prayerNames: req.prayerNames,
+    cartoonAvatar: req.cartoonAvatar,
     aspect: req.aspect ?? "9:16",
     captionMode: req.captionMode ?? "palabras",
     textStyle: req.textStyle,

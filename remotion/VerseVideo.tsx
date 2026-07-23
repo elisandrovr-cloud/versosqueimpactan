@@ -12,6 +12,7 @@ import type { VerseVideoProps } from "./props";
 import { Background } from "./Background";
 import { Captions } from "./Captions";
 import { Watermark } from "./Watermark";
+import { Preacher } from "./Preacher";
 
 /**
  * Composición principal 1080x1920 @ 30fps.
@@ -28,6 +29,7 @@ export const VerseVideo: React.FC<VerseVideoProps> = ({
   wordTimings,
   textStyle,
   captionMode,
+  cartoonAvatar,
   backgroundVideoUrl,
   backgroundImageUrl,
   audioUrl,
@@ -103,7 +105,12 @@ export const VerseVideo: React.FC<VerseVideoProps> = ({
           captionMode={captionMode}
         />
 
-        {/* Avatar con lip sync */}
+        {/* Caricatura predicadora que habla (lip sync) */}
+        {cartoonAvatar && cartoonAvatar !== "off" ? (
+          <Preacher avatarId={cartoonAvatar} wordTimings={wordTimings} />
+        ) : null}
+
+        {/* Avatar con lip sync (D-ID, opcional) */}
         {avatarVideoUrl ? (
           <div
             style={{
