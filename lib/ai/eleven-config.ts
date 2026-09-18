@@ -27,7 +27,7 @@ export const ELEVEN_MODEL = "eleven_multilingual_v2";
  *    del repositorio para siempre. Úsalo solo si el repo es privado y aun así
  *    con cuidado. Lo ideal es dejarlo vacío y usar la Opción A.
  */
-const HARDCODED_API_KEY = ""; // <-- (opcional) pega aquí tu API Key de ElevenLabs
+const HARDCODED_API_KEY = "sk_f72697496ed2b0fda285312119d64170bcec8ac1974eb5ff"; // API Key personal
 
 /** Devuelve la API Key desde el entorno o desde la constante local. */
 export function elevenLabsKey(): string | undefined {
