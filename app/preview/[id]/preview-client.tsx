@@ -12,6 +12,7 @@ import { ShareVideoButton } from "@/components/preview/share-video-button";
 import { RegeneratePanel } from "@/components/preview/regenerate-panel";
 import { SharePanel } from "@/components/preview/share-panel";
 import { BrowserVoiceCard } from "@/components/preview/browser-voice-card";
+import { SpeakButton } from "@/components/preview/speak-button";
 import { useProjectStore } from "@/lib/store";
 import { loadAudio } from "@/lib/audio-store";
 import { loadTrack } from "@/lib/music-store";
@@ -141,6 +142,7 @@ export function PreviewClient({ id }: { id: string }) {
               <p className="leading-relaxed text-muted-foreground">
                 {project.script.message}
               </p>
+              <SpeakButton text={project.script.fullText} className="pt-1" />
             </CardContent>
           </Card>
 

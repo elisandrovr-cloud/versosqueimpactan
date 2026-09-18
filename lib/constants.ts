@@ -4,7 +4,7 @@ export const APP_NAME = "Versos que Impactan";
 export const APP_TAGLINE =
   "Videos con mensajes de Dios que tocan corazones — generados en un clic.";
 /** Versión visible en el pie de página: confirma qué build está desplegado. */
-export const APP_VERSION = "4.3";
+export const APP_VERSION = "4.4";
 
 /** Duraciones disponibles (segundos). */
 export const DURATIONS = [15, 30, 45, 60, 75, 90] as const;
@@ -154,6 +154,16 @@ export const TEXT_STYLES: {
  * ElevenLabs cada voz sería un actor distinto de estudio.
  */
 export const VOICES = [
+  {
+    id: "mi-voz",
+    label: "🎙️ Mi voz (clonada) — ElevenLabs",
+    description: "Tu voz personal para predicar de forma natural",
+    edge: "es-MX-JorgeNeural", // respaldo gratuito si no hay clave
+    eleven: "e5ZsmqtVxURw55ZlfGJ7", // tu voz clonada
+    openai: "onyx",
+    polly: "Miguel",
+    rate: 1.0,
+  },
   {
     id: "jorge",
     label: "Jorge — cálida y profunda (México) 👨",
