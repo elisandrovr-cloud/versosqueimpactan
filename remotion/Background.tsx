@@ -7,19 +7,23 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
+import type { BackgroundScene } from "@/lib/types";
+import { activeScene } from "@/lib/scenes";
 
 /**
  * Fondo del video:
- *  - Con URL: video cinematográfico de paisaje (Pexels/Runway) con
- *    movimiento Ken Burns suave y loop.
- *  - Sin URL (demo): cielo degradado animado con halo de luz divina.
+ *  - Con `scenes`: varios paisajes que CAMBIAN solos a lo largo del video
+ *    (prédicas largas), con crossfade suave entre escenas.
+ *  - Con URL: video/foto cinematográfico único con Ken Burns.
+ *  - Sin nada (demo): cielo degradado animado con halo de luz divina.
  * Siempre con viñeta oscura para que el texto sea legible.
  */
 export const Background: React.FC<{
   videoUrl?: string;
   imageUrl?: string;
+  scenes?: BackgroundScene[];
   seed: number;
-}> = ({ videoUrl, imageUrl, seed }) => {
+}> = ({ videoUrl, imageUrl, scenes, seed }) => {
   const frame = useCurrentFrame();
   const { durationInFrames, fps, width, height } = useVideoConfig();
   const haloSize = Math.min(width, height) * 0.85;
@@ -28,6 +32,34 @@ export const Background: React.FC<{
   const scale = interpolate(frame, [0, durationInFrames], [1, 1.12], {
     extrapolateRight: "clamp",
   });
+
+  // 🎬 Escenas que cambian solas (prédicas): crossfade entre paisajes.
+  const scene = activeScene(scenes, frame / Math.max(durationInFrames, 1));
+  if (scene) {
+    return (
+      <AbsoluteFill style={{ backgroundColor: "#000" }}>
+        {scene.curr.imageUrl ? (
+          <AbsoluteFill style={{ transform: `scale(${scale * 1.06})` }}>
+            <Img
+              src={scene.curr.imageUrl}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          </AbsoluteFill>
+        ) : null}
+        {scene.next?.imageUrl && scene.blend > 0 ? (
+          <AbsoluteFill
+            style={{ transform: `scale(${scale * 1.06})`, opacity: scene.blend }}
+          >
+            <Img
+              src={scene.next.imageUrl}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          </AbsoluteFill>
+        ) : null}
+        <Vignette />
+      </AbsoluteFill>
+    );
+  }
 
   const palettes = [
     ["#0b1026", "#1a2f5c", "#c88a3d"], // azul noche + oro (amanecer)
@@ -113,18 +145,25 @@ export const Background: React.FC<{
       )}
 
       {/* Viñeta cinematográfica para legibilidad del texto */}
-      <AbsoluteFill
-        style={{
-          background:
-            "radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.55) 100%)",
-        }}
-      />
-      <AbsoluteFill
-        style={{
-          background:
-            "linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 25%, transparent 60%, rgba(0,0,0,0.6) 100%)",
-        }}
-      />
+      <Vignette />
     </AbsoluteFill>
   );
 };
+
+/** Viñeta oscura (radial + degradado) para que el texto siempre se lea. */
+const Vignette: React.FC = () => (
+  <>
+    <AbsoluteFill
+      style={{
+        background:
+          "radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.55) 100%)",
+      }}
+    />
+    <AbsoluteFill
+      style={{
+        background:
+          "linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 25%, transparent 60%, rgba(0,0,0,0.6) 100%)",
+      }}
+    />
+  </>
+);

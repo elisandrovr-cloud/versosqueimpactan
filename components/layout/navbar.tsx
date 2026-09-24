@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   Factory,
   Rocket,
+  Mic,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ const links = [
   { href: "/publicar", label: "Publicar", icon: Rocket },
   { href: "/estudio", label: "Fábrica", icon: Factory },
   { href: "/generador", label: "Generador", icon: Clapperboard },
+  { href: "/predica", label: "Prédicas", icon: Mic },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/historial", label: "Mis videos", icon: History },
 ];

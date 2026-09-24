@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runGenerationPipeline } from "@/lib/pipeline";
-import { MAX_DURATION, MIN_DURATION } from "@/lib/constants";
+import { MAX_DURATION, MIN_DURATION, SERMON_MAX, SERMON_MIN } from "@/lib/constants";
 import type { GenerateRequest } from "@/lib/types";
 
 export const runtime = "nodejs";
-// El pipeline completo (guion + voz + fondo + lip sync) puede tardar.
-// 60s es válido en el plan Hobby de Vercel (máximo permitido: 300s).
-export const maxDuration = 60;
+// Las prédicas largas (voz de 5–10 min con ElevenLabs) tardan más; 300s es el
+// máximo del plan Hobby de Vercel.
+export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
   let body: GenerateRequest;
@@ -23,10 +23,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const durationSec = Math.min(
-    Math.max(Number(body.durationSec) || 30, MIN_DURATION),
-    MAX_DURATION
-  );
+  // Prédicas: 5–10 min. Cortos: 15s–3 min.
+  const isSermon = body.mode === "predica";
+  const durationSec = isSermon
+    ? Math.min(Math.max(Number(body.durationSec) || SERMON_MIN, SERMON_MIN), SERMON_MAX)
+    : Math.min(Math.max(Number(body.durationSec) || 30, MIN_DURATION), MAX_DURATION);
 
   try {
     const project = await runGenerationPipeline({ ...body, durationSec });

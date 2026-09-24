@@ -4,6 +4,7 @@ import type { SocialNetwork, VideoProject } from "../types";
 import { FPS, resolveFormat } from "../constants";
 import { activePage, captionFontSize, getPages, getTextStyle } from "../captions";
 import { mouthOpenAt, preacherDataUri, preacherRect } from "../preacher";
+import { activeScene } from "../scenes";
 
 /**
  * 🎬 EXPORTADOR EN EL NAVEGADOR — descarga garantizada en cualquier hosting.
@@ -127,6 +128,24 @@ async function loadPreacher(avatarId?: string): Promise<PreacherImages | null> {
   }
 }
 
+/** Precarga las imágenes de las escenas de fondo (prédicas largas). */
+async function loadSceneImages(
+  scenes?: { imageUrl?: string }[]
+): Promise<Map<string, HTMLImageElement>> {
+  const map = new Map<string, HTMLImageElement>();
+  if (!scenes || scenes.length === 0) return map;
+  const urls = Array.from(
+    new Set(scenes.map((s) => s.imageUrl).filter((u): u is string => Boolean(u)))
+  );
+  await Promise.all(
+    urls.map(async (url) => {
+      const img = await loadBackgroundImage(url);
+      if (img) map.set(url, img);
+    })
+  );
+  return map;
+}
+
 function seekTo(video: HTMLVideoElement, t: number): Promise<void> {
   return new Promise((resolve) => {
     const target = Math.min(t, Math.max(video.duration - 0.05, 0));
@@ -212,6 +231,21 @@ const ICON_PATHS: Record<Exclude<SocialNetwork, "instagram">, string> = {
   x: "M17.7 3H21l-7.1 8.1L22.2 21h-6.6l-5.1-6.2L4.6 21H1.3l7.6-8.7L1 3h6.8l4.6 5.7L17.7 3zm-1.2 16h1.8L6.8 4.9H4.9L16.5 19z",
 };
 
+function drawKenBurns(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  W: number,
+  H: number,
+  zoom: number,
+  t: number
+) {
+  const iw = img.naturalWidth, ih = img.naturalHeight;
+  const scale = Math.max(W / iw, H / ih) * zoom * 1.06;
+  const dw = iw * scale, dh = ih * scale;
+  const drift = Math.sin(t * 0.15) * W * 0.015;
+  ctx.drawImage(img, (W - dw) / 2 + drift, (H - dh) / 2, dw, dh);
+}
+
 function drawFrame(
   ctx: CanvasRenderingContext2D,
   project: VideoProject,
@@ -219,6 +253,7 @@ function drawFrame(
   totalSec: number,
   bgVideo: HTMLVideoElement | null,
   bgImage: HTMLImageElement | null,
+  sceneImages: Map<string, HTMLImageElement>,
   preacher: PreacherImages | null,
   seed: number
 ) {
@@ -229,18 +264,25 @@ function drawFrame(
 
   // ---- Fondo ----
   const zoom = 1 + 0.12 * (t / totalSec);
-  if (bgVideo) {
+  const scene = activeScene(project.assets.backgroundScenes, t / Math.max(totalSec, 0.001));
+  if (scene && scene.curr.imageUrl && sceneImages.has(scene.curr.imageUrl)) {
+    // 🎬 Escenas que cambian solas (prédicas) con crossfade.
+    drawKenBurns(ctx, sceneImages.get(scene.curr.imageUrl)!, W, H, zoom, t);
+    const nextImg = scene.next?.imageUrl ? sceneImages.get(scene.next.imageUrl) : null;
+    if (nextImg && scene.blend > 0) {
+      ctx.save();
+      ctx.globalAlpha = scene.blend;
+      drawKenBurns(ctx, nextImg, W, H, zoom, t);
+      ctx.restore();
+    }
+  } else if (bgVideo) {
     const vw = bgVideo.videoWidth, vh = bgVideo.videoHeight;
     const scale = Math.max(W / vw, H / vh) * zoom;
     const dw = vw * scale, dh = vh * scale;
     ctx.drawImage(bgVideo, (W - dw) / 2, (H - dh) / 2, dw, dh);
   } else if (bgImage) {
     // Foto con Ken Burns: zoom + deriva lateral suave.
-    const iw = bgImage.naturalWidth, ih = bgImage.naturalHeight;
-    const scale = Math.max(W / iw, H / ih) * zoom * 1.06;
-    const dw = iw * scale, dh = ih * scale;
-    const drift = Math.sin(t * 0.15) * W * 0.015;
-    ctx.drawImage(bgImage, (W - dw) / 2 + drift, (H - dh) / 2, dw, dh);
+    drawKenBurns(ctx, bgImage, W, H, zoom, t);
   } else {
     const [c1, c2, glow] = PALETTES[Math.abs(seed) % PALETTES.length];
     const grad = ctx.createLinearGradient(0, 0, W * 0.15, H);
@@ -465,12 +507,13 @@ export async function exportVideoInBrowser(
   const codec = await pickVideoCodec(W, H);
   await document.fonts.ready;
 
-  const [bgVideo, bgImage, preacher, audioBuffer] = await Promise.all([
+  const [bgVideo, bgImage, preacher, sceneImages, audioBuffer] = await Promise.all([
     loadBackgroundVideo(project.assets.backgroundVideoUrl),
     loadBackgroundImage(
       project.assets.backgroundVideoUrl ? undefined : project.assets.backgroundImageUrl
     ),
     loadPreacher(project.cartoonAvatar),
+    loadSceneImages(project.assets.backgroundScenes),
     (onProgress({ phase: "audio", pct: 6 }), renderAudioMix(project, durationSec)),
   ]);
 
@@ -557,7 +600,7 @@ export async function exportVideoInBrowser(
     if (encodeError) throw encodeError;
     const t = f / FPS;
     if (bgVideo) await seekTo(bgVideo, t % bgVideo.duration);
-    drawFrame(ctx, project, t, durationSec, bgVideo, bgImage, preacher, seed);
+    drawFrame(ctx, project, t, durationSec, bgVideo, bgImage, sceneImages, preacher, seed);
     const frame = new VideoFrame(canvas, {
       timestamp: Math.round(t * 1e6),
       duration: Math.round(1e6 / FPS),

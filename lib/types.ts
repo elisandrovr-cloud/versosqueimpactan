@@ -35,6 +35,19 @@ export type AspectId = "9:16" | "1:1" | "16:9";
 /** Cómo se muestran los subtítulos. */
 export type CaptionMode = "palabras" | "parrafo";
 
+/** Modo de generación: video corto (15s–90s) o prédica larga (5–10 min). */
+export type GenerationMode = "corto" | "predica";
+
+/**
+ * Una escena de fondo dentro de la línea de tiempo. `startPct` es el punto
+ * (0..1) del video donde empieza a mostrarse; las escenas se ordenan por él.
+ */
+export interface BackgroundScene {
+  imageUrl?: string;
+  videoUrl?: string;
+  startPct: number;
+}
+
 /** Qué motor generó la voz en off. */
 export type VoiceProvider =
   | "elevenlabs"
@@ -69,6 +82,13 @@ export interface ProjectAssets {
   /** Foto de paisaje (efecto Ken Burns) cuando no hay video disponible. */
   backgroundImageUrl?: string;
   backgroundPosterUrl?: string;
+  /**
+   * Escenas de fondo que cambian AUTOMÁTICAMENTE a lo largo del video (usado
+   * en las prédicas largas: paisaje calmado al inicio, clímax poderoso, etc.).
+   * Cada escena arranca en `startPct` (0..1) del tiempo total, con transición
+   * suave. Si está vacío, se usa `backgroundImageUrl`/`backgroundVideoUrl`.
+   */
+  backgroundScenes?: BackgroundScene[];
   /** Pista de música subida por el usuario (guardada en IndexedDB). */
   musicTrackId?: string;
   /** Video del avatar con lip sync (D-ID / HeyGen). */
@@ -95,6 +115,10 @@ export interface VideoProject {
   voiceId: string;
   /** Tipo de contenido: versículo, historia épica o confrontación viral. */
   contentStyle?: ContentStyle;
+  /** Modo de generación: video corto o prédica larga. */
+  mode?: GenerationMode;
+  /** Etiqueta de fecha de la prédica, ej. "jueves 24 de septiembre". */
+  sermonDate?: string;
   /** Nombres para dedicar la oración. */
   prayerNames?: string;
   /** Caricatura predicadora que habla (id) o "off". */
@@ -123,6 +147,10 @@ export interface GenerateRequest {
   durationSec: number;
   voiceId: string;
   contentStyle?: ContentStyle;
+  /** Modo de generación: video corto o prédica larga. */
+  mode?: GenerationMode;
+  /** Etiqueta de fecha de la prédica, ej. "jueves 24 de septiembre". */
+  sermonDate?: string;
   prayerNames?: string;
   cartoonAvatar?: string;
   cartoonPosition?: string;

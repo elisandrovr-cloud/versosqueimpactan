@@ -229,3 +229,143 @@ export function appendPrayer(
   if (includeCta) extra.push(CLOSING_CTA);
   return { ...script, fullText: `${script.fullText} ${extra.join(" ")}` };
 }
+
+/* ===================================================================== *
+ *  PRÉDICAS LARGAS (5–10 min) — conscientes de la fecha y SIEMPRE únicas
+ * ===================================================================== */
+
+/** Aperturas naturales según el día/fecha (varias, para no repetir). */
+const DATE_OPENERS = [
+  (d: string) =>
+    `Hoy es ${d}, y quiero decirte algo antes de que sigas con tu día: Dios tiene una palabra especial preparada solo para ti.`,
+  (d: string) =>
+    `Bienvenido a la prédica de ${d}. No fue casualidad que llegaras hasta aquí; creo con todo mi corazón que el Señor quiere hablarte en este momento.`,
+  (d: string) =>
+    `${capitalize(d)}. Detén todo por unos minutos, respira hondo, y permite que estas palabras lleguen a lo más profundo de tu corazón.`,
+  (d: string) =>
+    `En este ${d}, quizás te levantaste con preguntas, con cargas o con cansancio. Pero hoy el cielo tiene una respuesta para ti.`,
+  (d: string) =>
+    `Es ${d}, y si nadie más te lo ha dicho hoy: Dios no se ha olvidado de ti. Escucha bien, porque esto va a marcar tu semana.`,
+];
+
+/** Ganchos que sostienen la atención tras la apertura. */
+const HOOKS = [
+  "Lo que voy a compartirte no es un mensaje más; es una verdad que puede cambiar la manera en que ves tu vida.",
+  "Si te quedas hasta el final, algo dentro de ti va a ser diferente. Te lo aseguro.",
+  "Hay una razón por la que estás escuchando esto justo hoy. No la dejes pasar.",
+  "Quiero que escuches esto no con los oídos, sino con el corazón.",
+];
+
+/** Transiciones para enlazar los puntos y dar ritmo de sermón. */
+const TRANSITIONS = [
+  "Pero déjame ir más profundo.",
+  "Y aquí viene lo más importante.",
+  "Ahora presta mucha atención a esto.",
+  "Quiero que entiendas algo todavía más grande.",
+  "Y no termina ahí.",
+];
+
+/** Historias/ejemplos para ilustrar (rotan por semilla). */
+const STORY_BANK = [
+  "Piensa en Pedro, hundiéndose en el mar. En el instante en que apartó los ojos de Jesús, empezó a caer. Pero bastó con estirar su mano y clamar: '¡Señor, sálvame!', para que Jesús lo levantara. Tu clamor de hoy también está siendo escuchado.",
+  "Recuerda a la mujer que por doce años vivió con una enfermedad que nadie pudo sanar. Gastó todo, perdió toda esperanza. Pero un día se dijo: 'si tan solo toco su manto, seré sana'. Y así fue. A veces el milagro está a un paso de fe de distancia.",
+  "Mira a Job: lo perdió todo en un solo día — sus hijos, sus bienes, su salud. Y aun así se atrevió a decir: 'Jehová dio, y Jehová quitó; sea el nombre de Jehová bendito'. Al final, Dios le devolvió el doble de todo lo que había perdido.",
+  "Piensa en el ciego Bartimeo, sentado al borde del camino. Cuando escuchó que Jesús pasaba, gritó tan fuerte que quisieron callarlo. Pero él gritó más fuerte. Y ese grito le devolvió la vista. No dejes que nadie calle tu clamor.",
+  "Acuérdate de Lázaro, cuatro días muerto en la tumba. Todos decían que ya era tarde, que ya olía a muerte. Pero Jesús dijo: 'Lázaro, ven fuera'. Lo que tú diste por muerto, Dios lo puede resucitar.",
+  "Piensa en Gedeón, escondido por miedo, sintiéndose el más pequeño de su casa. Y aun así, el ángel lo llamó 'varón esforzado y valiente'. Dios no te llama por lo que eres hoy, sino por lo que Él ya ve en ti.",
+];
+
+/** Declaraciones de clímax — el punto emocional más alto del sermón. */
+const CLIMAXES = [
+  "¡Levántate! Porque lo que el enemigo quiso usar para destruirte, Dios lo va a convertir en tu mayor testimonio. Tu historia no termina en el dolor: termina en victoria.",
+  "Hoy se rompe toda cadena. Lo que te ató por años, en el nombre de Jesús, hoy pierde su poder sobre tu vida. ¡Eres libre!",
+  "Escúchalo bien: no importa qué tan lejos hayas caído, la mano de Dios llega más profundo que cualquier abismo. Él va a buscarte, dondequiera que estés.",
+  "Este es tu momento. El mismo Dios que abrió el mar, que cerró la boca de los leones, que resucitó a los muertos, está de tu lado hoy. ¿A quién temerás?",
+];
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/** Baraja determinista por semilla (para que cada prédica sea distinta). */
+function shuffle<T>(arr: T[], seed: number): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.abs(seed * 9301 + 49297 + i * 233) % (i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/**
+ * 📖 PRÉDICA COMPLETA CONSCIENTE DE LA FECHA — genera un sermón de 5 a 10 min
+ * con estructura: apertura por fecha → gancho → versículo → puntos → historia
+ * → clímax → oración → cierre + llamado a la acción. Mezcla puntos de varios
+ * sermones y baraja historias/clímax con la semilla, así el contenido es
+ * DIFERENTE cada vez aunque no haya IA disponible.
+ */
+export function buildDatedSermon(opts: {
+  topic: string;
+  durationSec: number;
+  seed: number;
+  dateLabel?: string;
+  prayerNames?: string;
+}): VideoScript {
+  const { topic, durationSec, seed, dateLabel, prayerNames } = opts;
+  const base = findSermon(topic, seed);
+
+  // Reunir puntos de varios sermones y barajarlos para máxima variedad.
+  const allPoints = shuffle(
+    SERMONS.flatMap((s) => s.points),
+    seed
+  );
+
+  const parts: string[] = [];
+  if (dateLabel) parts.push(pick(DATE_OPENERS, seed)(dateLabel));
+  parts.push(pick(HOOKS, seed + 3));
+  parts.push(base.intro);
+  parts.push(`La Biblia dice en ${base.reference}: ${base.verse}`);
+
+  const targetWords = Math.floor(durationSec * NARRATION_WPS);
+  const countWords = () => parts.join(" ").split(/\s+/).length;
+
+  // Desarrollo: puntos + transiciones + historias intercaladas.
+  let pointIdx = 0;
+  let storyIdx = 0;
+  const stories = shuffle(STORY_BANK, seed + 5);
+  while (countWords() < targetWords - 120 && pointIdx < allPoints.length) {
+    parts.push(pick(TRANSITIONS, seed + pointIdx));
+    parts.push(allPoints[pointIdx].title + ".");
+    parts.push(allPoints[pointIdx].body);
+    // Cada 2 puntos, ilustra con una historia.
+    if (pointIdx % 2 === 1 && storyIdx < stories.length) {
+      parts.push(stories[storyIdx++]);
+    }
+    pointIdx++;
+  }
+
+  // Rellenar con aliento si aún falta antes del clímax.
+  let guard = 0;
+  while (countWords() < targetWords - 90 && guard < 30) {
+    parts.push(pick(ENCOURAGEMENTS, seed + guard * 7));
+    if (guard % 3 === 2 && storyIdx < stories.length) {
+      parts.push(stories[storyIdx++]);
+    }
+    guard++;
+  }
+
+  // Clímax emocional.
+  parts.push(pick(CLIMAXES, seed + 11));
+
+  // Oración dedicada + cierre + llamado a la acción.
+  parts.push(prayerBlock(prayerNames));
+  parts.push(base.close);
+  parts.push(CLOSING_CTA);
+
+  return {
+    verse: base.verse,
+    reference: base.reference,
+    message: pick(CLIMAXES, seed + 11),
+    fullText: parts.join(" "),
+  };
+}

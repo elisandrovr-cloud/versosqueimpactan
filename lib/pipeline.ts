@@ -4,6 +4,7 @@ import { generateVoice } from "./ai/voice";
 import { findBackground } from "./ai/pexels";
 import { generateLipSync } from "./ai/did";
 import { uploadAudioDataUrl } from "./supabase/server";
+import { sermonScenes } from "./constants";
 import { generateId, humanizeForSpeech } from "./utils";
 
 /**
@@ -24,6 +25,10 @@ export async function runGenerationPipeline(
   const id = generateId();
   const seed = req.variationSeed ?? Math.floor(Math.random() * 1e9);
 
+  // Modo prédica larga: fuerza estilo sermón y fondos que cambian solos.
+  const isSermon = req.mode === "predica";
+  const contentStyle = isSermon ? "predica" : req.contentStyle;
+
   // 1. 🖋️ Agente Guionista
   const { script } = await generateScript({
     topic: req.topic,
@@ -31,8 +36,9 @@ export async function runGenerationPipeline(
     manualVerse: req.manualVerse,
     manualReference: req.manualReference,
     durationSec: req.durationSec,
-    contentStyle: req.contentStyle,
+    contentStyle,
     prayerNames: req.prayerNames,
+    sermonDate: req.sermonDate,
     seed,
   });
 
@@ -40,9 +46,9 @@ export async function runGenerationPipeline(
   // La voz lee el texto "humanizado": referencias como "6:17" se convierten
   // a "capítulo 6, versículo 17" para que NO las lea como una hora.
   const spokenText = humanizeForSpeech(script.fullText);
-  // Si el usuario eligió un fondo de la galería incluida, se usa directo
-  // (siempre disponible). Si no, se busca un video real en Pexels/Pixabay.
-  const useBundled = Boolean(req.bundledBackground);
+  // En prédicas, los fondos cambian solos (escenas); si no, galería o Pexels.
+  const scenes = isSermon ? sermonScenes(seed) : undefined;
+  const useBundled = Boolean(req.bundledBackground) || isSermon;
   const [voice, background] = await Promise.all([
     generateVoice({
       text: spokenText,
@@ -79,15 +85,18 @@ export async function runGenerationPipeline(
     imageUrl?: string;
     posterUrl?: string;
   };
-  const backgroundImageUrl = useBundled
-    ? `/backgrounds/${req.bundledBackground}.svg`
-    : bg.imageUrl;
+  const backgroundImageUrl = isSermon
+    ? scenes?.[0]?.imageUrl
+    : useBundled
+      ? `/backgrounds/${req.bundledBackground}.svg`
+      : bg.imageUrl;
 
-  // La duración final del video se ajusta al audio real + respiro de cierre.
-  // Tope 190s para permitir predicas largas (1-3 min).
+  // La duración final se ajusta al audio real + respiro de cierre.
+  // Prédicas: hasta ~10 min (620s). Cortos: hasta ~3 min (190s).
+  const durationCap = isSermon ? 620 : 190;
   const durationSec = voice.demo
     ? req.durationSec
-    : Math.min(Math.max(voice.audioDurationSec + 1.5, 15), 190);
+    : Math.min(Math.max(voice.audioDurationSec + 1.5, 15), durationCap);
 
   return {
     id,
@@ -100,7 +109,9 @@ export async function runGenerationPipeline(
     durationSec,
     script,
     voiceId: req.voiceId,
-    contentStyle: req.contentStyle ?? "versiculo",
+    contentStyle: contentStyle ?? "versiculo",
+    mode: req.mode ?? "corto",
+    sermonDate: req.sermonDate,
     prayerNames: req.prayerNames,
     cartoonAvatar: req.cartoonAvatar,
     cartoonPosition: req.cartoonPosition,
@@ -120,6 +131,7 @@ export async function runGenerationPipeline(
       wordTimings: voice.wordTimings,
       backgroundVideoUrl: bg.videoUrl,
       backgroundImageUrl,
+      backgroundScenes: scenes,
       backgroundPosterUrl: bg.posterUrl,
       avatarVideoUrl,
       musicUrl: process.env.NEXT_PUBLIC_MUSIC_URL || undefined,

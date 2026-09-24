@@ -17,6 +17,7 @@ export function projectToProps(project: VideoProject): VerseVideoProps {
     cartoonPosition: project.cartoonPosition,
     backgroundVideoUrl: project.assets.backgroundVideoUrl,
     backgroundImageUrl: project.assets.backgroundImageUrl,
+    backgroundScenes: project.assets.backgroundScenes,
     audioUrl: project.assets.audioUrl,
     avatarVideoUrl: project.assets.avatarVideoUrl,
     musicUrl: project.assets.musicUrl,

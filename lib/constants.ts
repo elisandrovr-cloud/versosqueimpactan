@@ -4,12 +4,21 @@ export const APP_NAME = "Versos que Impactan";
 export const APP_TAGLINE =
   "Videos con mensajes de Dios que tocan corazones — generados en un clic.";
 /** Versión visible en el pie de página: confirma qué build está desplegado. */
-export const APP_VERSION = "4.4";
+export const APP_VERSION = "4.5";
 
 /** Duraciones disponibles (segundos). */
 export const DURATIONS = [15, 30, 45, 60, 75, 90] as const;
 export const MIN_DURATION = 15;
 export const MAX_DURATION = 180;
+
+/** Prédicas largas: 5, 7 y 10 minutos. */
+export const SERMON_DURATIONS = [
+  { sec: 300, label: "5 minutos" },
+  { sec: 420, label: "7 minutos" },
+  { sec: 600, label: "10 minutos" },
+] as const;
+export const SERMON_MIN = 300;
+export const SERMON_MAX = 600;
 export const FPS = 30;
 export const VIDEO_WIDTH = 1080;
 export const VIDEO_HEIGHT = 1920;
@@ -68,6 +77,31 @@ export const BUNDLED_BACKGROUNDS = [
 
 export function bundledBackgroundUrl(id: string): string {
   return `/backgrounds/${id}.svg`;
+}
+
+/**
+ * 🎬 ARCO EMOCIONAL DE FONDOS PARA PRÉDICAS — el fondo cambia solo a lo largo
+ * del sermón siguiendo la emoción del mensaje:
+ *   calma (intro) → luz/desarrollo → poder (clímax) → amanecer/cierre.
+ * Cada fase apunta a varios fondos de la galería incluida; se elige uno por
+ * fase con la semilla, así cada prédica tiene una secuencia distinta pero
+ * siempre coherente. Devuelve escenas con su `startPct` repartido.
+ */
+const SCENE_ARC: string[][] = [
+  ["cielo-celestial", "noche-estrellada", "amatista"], // intro: calma, cielo
+  ["bosque-rayos", "campo-dorado", "oceano-dorado"], // desarrollo: luz
+  ["montanas-amanecer", "cruz-colina"], // clímax: poder
+  ["campo-dorado", "montanas-amanecer", "cielo-celestial"], // cierre: amanecer
+];
+
+export function sermonScenes(
+  seed: number
+): { imageUrl: string; startPct: number }[] {
+  const phases = SCENE_ARC.length;
+  return SCENE_ARC.map((options, i) => {
+    const id = options[Math.abs(seed * (i + 7) + i * 31) % options.length];
+    return { imageUrl: bundledBackgroundUrl(id), startPct: i / phases };
+  });
 }
 
 /** Estilos de texto animado (estética CapCut premium). */

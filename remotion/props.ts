@@ -1,4 +1,5 @@
 import type {
+  BackgroundScene,
   CaptionMode,
   TextStyleId,
   WatermarkConfig,
@@ -20,6 +21,8 @@ export interface VerseVideoProps extends Record<string, unknown> {
   cartoonPosition?: string;
   backgroundVideoUrl?: string;
   backgroundImageUrl?: string;
+  /** Escenas de fondo que cambian solas (prédicas largas). */
+  backgroundScenes?: BackgroundScene[];
   audioUrl?: string;
   avatarVideoUrl?: string;
   musicUrl?: string;

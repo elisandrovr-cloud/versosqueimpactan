@@ -33,6 +33,7 @@ export const VerseVideo: React.FC<VerseVideoProps> = ({
   cartoonPosition,
   backgroundVideoUrl,
   backgroundImageUrl,
+  backgroundScenes,
   audioUrl,
   avatarVideoUrl,
   musicUrl,
@@ -63,6 +64,7 @@ export const VerseVideo: React.FC<VerseVideoProps> = ({
         <Background
           videoUrl={backgroundVideoUrl}
           imageUrl={backgroundImageUrl}
+          scenes={backgroundScenes}
           seed={seed}
         />
 

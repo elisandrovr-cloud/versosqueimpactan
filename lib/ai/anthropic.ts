@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { ContentStyle, VideoScript } from "../types";
 import { NARRATION_WPS } from "../constants";
 import { buildDemoScript } from "../verse-bank";
-import { appendPrayer, buildSermonScript, fillToTarget } from "../sermon-bank";
+import { appendPrayer, buildDatedSermon, fillToTarget } from "../sermon-bank";
 
 /**
  * Construye el guion SIN IA (banco curado). Rutea a sermón para "predica",
@@ -18,10 +18,18 @@ function buildLocalScript(opts: {
   manualReference?: string;
   style: ContentStyle;
   prayerNames?: string;
+  sermonDate?: string;
 }): VideoScript {
-  const { topic, durationSec, seed, manualVerse, manualReference, style, prayerNames } = opts;
+  const { topic, durationSec, seed, manualVerse, manualReference, style, prayerNames, sermonDate } = opts;
   if (style === "predica") {
-    return buildSermonScript(topic, durationSec, seed ?? Date.now(), prayerNames);
+    // Prédica larga consciente de la fecha (contenido distinto cada vez).
+    return buildDatedSermon({
+      topic,
+      durationSec,
+      seed: seed ?? Date.now(),
+      dateLabel: sermonDate,
+      prayerNames,
+    });
   }
   let script = buildDemoScript(
     topic,
@@ -54,9 +62,10 @@ export async function generateScript(opts: {
   durationSec: number;
   contentStyle?: ContentStyle;
   prayerNames?: string;
+  sermonDate?: string;
   seed?: number;
 }): Promise<{ script: VideoScript; demo: boolean }> {
-  const { topic, customMessage, manualVerse, manualReference, durationSec, prayerNames } = opts;
+  const { topic, customMessage, manualVerse, manualReference, durationSec, prayerNames, sermonDate } = opts;
   const style = opts.contentStyle ?? "versiculo";
 
   if (!process.env.ANTHROPIC_API_KEY) {
@@ -69,6 +78,7 @@ export async function generateScript(opts: {
         manualReference,
         style,
         prayerNames,
+        sermonDate,
       }),
       demo: true,
     };
@@ -96,12 +106,15 @@ ${durationSec <= 20 ? "- Solo el versículo y su referencia (video corto de impa
 - El versículo que respalda la verdad, con su referencia.
 - Cierre con un reto directo a comentar o etiquetar a alguien (esto dispara el algoritmo).
 - PROHIBIDO: atacar denominaciones, personas o pecados específicos de forma humillante.`,
-    predica: `ESTILO: PREDICA IMPACTANTE (sermón completo). Escribe un sermón poderoso y emotivo de ${durationSec} segundos:
+    predica: `ESTILO: PREDICA IMPACTANTE (sermón completo). Escribe un sermón poderoso y emotivo de ${durationSec} segundos (${Math.round(durationSec / 60)} minutos aprox.)${sermonDate ? `, para la prédica de ${sermonDate}` : ""}:
+${sermonDate ? `- COMIENZA de forma natural mencionando la fecha, por ejemplo: "Hoy es ${sermonDate}, y Dios tiene una palabra especial para ti...". Que se sienta fresco y actual.\n` : ""}- Un GANCHO en los primeros segundos que detenga el scroll y toque una emoción real.
 - INTRODUCCIÓN que conecte con el dolor o la necesidad de quien escucha.
 - El versículo base con su referencia.
-- 3 PUNTOS bíblicos claros, cada uno con su explicación y un ejemplo de la Biblia o de la vida real.
+- VARIOS PUNTOS bíblicos (3 a 5 según la duración), cada uno con su explicación, una transición y un EJEMPLO o HISTORIA bíblica o de la vida real.
+- Un CLÍMAX emocional: la parte más poderosa, declarativa y esperanzadora.
 - Una PARTE DE ORACIÓN dedicada${prayerNames?.trim() ? ` especialmente por: ${prayerNames}` : " por quien mira el video"}.
 - CIERRE fuerte y esperanzador.
+- Que el contenido sea ÚNICO y no genérico: usa imágenes frescas, no repitas fórmulas gastadas.
 - Termina SIEMPRE con: "Comenta abajo si quieres que oremos por ti o por alguien más. ¡Dios te bendiga!"`,
   }[style];
 
@@ -125,8 +138,8 @@ Responde SOLO con JSON válido (sin markdown):
   try {
     const response = await client.messages.create({
       model: "claude-sonnet-5",
-      // Las predicas largas necesitan más espacio de salida.
-      max_tokens: style === "predica" || durationSec > 60 ? 3000 : 1024,
+      // Las predicas largas necesitan mucho más espacio de salida.
+      max_tokens: style === "predica" ? 4096 : durationSec > 60 ? 3000 : 1024,
       messages: [{ role: "user", content: prompt }],
     });
 
@@ -150,6 +163,7 @@ Responde SOLO con JSON válido (sin markdown):
         manualReference,
         style,
         prayerNames,
+        sermonDate,
       }),
       demo: true,
     };
