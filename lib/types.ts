@@ -163,6 +163,8 @@ export interface GenerateRequest {
   bundledBackground?: string;
   includeAvatar: boolean;
   watermark: WatermarkConfig;
+  /** Referencias usadas recientemente, para NO repetir versículos/salmos. */
+  avoidReferences?: string[];
   /** Semilla para regenerar con variaciones. */
   variationSeed?: number;
 }

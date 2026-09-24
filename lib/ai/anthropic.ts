@@ -19,8 +19,9 @@ function buildLocalScript(opts: {
   style: ContentStyle;
   prayerNames?: string;
   sermonDate?: string;
+  avoid?: string[];
 }): VideoScript {
-  const { topic, durationSec, seed, manualVerse, manualReference, style, prayerNames, sermonDate } = opts;
+  const { topic, durationSec, seed, manualVerse, manualReference, style, prayerNames, sermonDate, avoid } = opts;
   if (style === "predica") {
     // Prédica larga consciente de la fecha (contenido distinto cada vez).
     return buildDatedSermon({
@@ -29,6 +30,7 @@ function buildLocalScript(opts: {
       seed: seed ?? Date.now(),
       dateLabel: sermonDate,
       prayerNames,
+      avoid,
     });
   }
   let script = buildDemoScript(
@@ -37,7 +39,8 @@ function buildLocalScript(opts: {
     seed,
     manualVerse,
     manualReference,
-    style
+    style,
+    avoid
   );
   // Rellenar hasta la duración objetivo (arregla el bug de duración corta).
   const filled = fillToTarget(script.fullText, durationSec, seed ?? 0);
@@ -63,10 +66,12 @@ export async function generateScript(opts: {
   contentStyle?: ContentStyle;
   prayerNames?: string;
   sermonDate?: string;
+  avoidReferences?: string[];
   seed?: number;
 }): Promise<{ script: VideoScript; demo: boolean }> {
   const { topic, customMessage, manualVerse, manualReference, durationSec, prayerNames, sermonDate } = opts;
   const style = opts.contentStyle ?? "versiculo";
+  const avoid = opts.avoidReferences ?? [];
 
   if (!process.env.ANTHROPIC_API_KEY) {
     return {
@@ -79,6 +84,7 @@ export async function generateScript(opts: {
         style,
         prayerNames,
         sermonDate,
+        avoid,
       }),
       demo: true,
     };
@@ -123,10 +129,16 @@ ${sermonDate ? `- COMIENZA de forma natural mencionando la fecha, por ejemplo: "
       ? `\nDEDICACIÓN: Incluye cerca del final una oración dedicada por: ${prayerNames}. Y termina con "Comenta abajo si quieres que oremos por ti o por alguien más. ¡Dios te bendiga!"`
       : "";
 
+  // Anti-repetición: NO reutilizar los versículos/salmos usados recientemente.
+  const avoidInstruction =
+    avoid.length > 0
+      ? `\nMUY IMPORTANTE (no repetir): NO uses ninguna de estas referencias que ya se usaron recientemente: ${avoid.join(", ")}. Elige un versículo DISTINTO y fresco (puedes usar Salmos u otros libros).`
+      : `\nElige un versículo fresco; varía entre distintos libros y Salmos en cada generación.`;
+
   const prompt = `Eres EXPERTO en marketing viral cristiano y guionista de los canales más exitosos del género (estilo @pastorleolopez, @oracionconia, @palabrasdelcreador5). Sabes que los primeros 2 segundos deciden si el video se ve completo, que la emoción genera compartidos y que las preguntas generan comentarios. Escribes en español latinoamericano, con calidez pastoral, como si Dios le hablara directamente a la persona que mira el video.
 
 TEMA: ${topic}${customMessage ? `\nMENSAJE DEL USUARIO (inspírate en esto): "${customMessage}"` : ""}
-${verseInstruction}
+${verseInstruction}${avoidInstruction}
 
 DURACIÓN DEL VIDEO: ${durationSec} segundos → el guion narrado completo debe tener aproximadamente ${targetWords} palabras (ritmo pausado y emotivo). NO te pases de ${targetWords + 8} palabras.
 
@@ -164,6 +176,7 @@ Responde SOLO con JSON válido (sin markdown):
         style,
         prayerNames,
         sermonDate,
+        avoid,
       }),
       demo: true,
     };

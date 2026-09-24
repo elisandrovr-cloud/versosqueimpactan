@@ -49,6 +49,7 @@ import { saveAudio } from "@/lib/audio-store";
 import { loadTrack } from "@/lib/music-store";
 import { fixProjectSync } from "@/lib/client-audio";
 import { ensureVoice } from "@/lib/client-tts";
+import { getRecentRefs, rememberRef } from "@/lib/recent-refs";
 import { formatDuration, cn } from "@/lib/utils";
 
 export function GeneratorForm() {
@@ -114,6 +115,7 @@ export function GeneratorForm() {
       bundledBackground: bgSource === "galeria" ? bundledBg : undefined,
       includeAvatar,
       watermark,
+      avoidReferences: getRecentRefs(),
     };
 
     try {
@@ -147,6 +149,7 @@ export function GeneratorForm() {
         await saveAudio(project.id, project.assets.audioUrl);
       }
       addProject(project);
+      rememberRef(project.script.reference);
       router.push(`/preview/${project.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error inesperado");

@@ -1,5 +1,6 @@
 import type { VideoScript } from "./types";
 import { NARRATION_WPS, TOPICS } from "./constants";
+import { pickScripture } from "./scripture-bank";
 
 /**
  * Banco curado de versículos y reflexiones por tema.
@@ -318,7 +319,8 @@ export function buildDemoScript(
   seed = Date.now(),
   manualVerse?: string,
   manualReference?: string,
-  style: "versiculo" | "historia" | "confrontacion" = "versiculo"
+  style: "versiculo" | "historia" | "confrontacion" = "versiculo",
+  avoid?: string[]
 ): VideoScript {
   const maxWordsBudget = Math.floor(durationSec * NARRATION_WPS);
 
@@ -361,8 +363,12 @@ export function buildDemoScript(
     )?.id ?? topic;
   const entries = BANK[topicId] ?? BANK.esperanza;
   const entry = pick(entries, seed);
-  const verse = manualVerse?.trim() || entry.verse;
-  const reference = manualReference?.trim() || (manualVerse ? "" : entry.reference);
+  // Versículo/salmo SIEMPRE fresco (del banco amplio, evitando los recientes),
+  // salvo que el usuario haya escrito uno manual.
+  const fresh = manualVerse?.trim() ? null : pickScripture({ avoid });
+  const verse = manualVerse?.trim() || fresh?.verse || entry.verse;
+  const reference =
+    manualReference?.trim() || (manualVerse ? "" : fresh?.reference || entry.reference);
   const message = pick(entry.reflections, seed >> 2);
 
   const maxWords = Math.floor(durationSec * NARRATION_WPS);

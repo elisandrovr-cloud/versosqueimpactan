@@ -9,6 +9,7 @@ import { useProjectStore } from "@/lib/store";
 import { saveAudio } from "@/lib/audio-store";
 import { fixProjectSync } from "@/lib/client-audio";
 import { ensureVoice } from "@/lib/client-tts";
+import { getRecentRefs, rememberRef } from "@/lib/recent-refs";
 import { BACKGROUNDS, TEXT_STYLES, VOICES } from "@/lib/constants";
 import type { GenerateRequest, VideoProject } from "@/lib/types";
 
@@ -61,6 +62,7 @@ export function RegeneratePanel({ project }: { project: VideoProject }) {
           : project.backgroundQuery,
       includeAvatar: project.includeAvatar,
       watermark: project.watermark,
+      avoidReferences: getRecentRefs(),
       variationSeed: seed,
     };
 
@@ -78,6 +80,7 @@ export function RegeneratePanel({ project }: { project: VideoProject }) {
         await saveAudio(newProject.id, newProject.assets.audioUrl);
       }
       addProject(newProject);
+      rememberRef(newProject.script.reference);
       router.push(`/preview/${newProject.id}`);
     } finally {
       setLoading(null);

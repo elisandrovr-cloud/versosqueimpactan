@@ -1,5 +1,6 @@
 import type { VideoScript } from "./types";
 import { NARRATION_WPS } from "./constants";
+import { pickScripture } from "./scripture-bank";
 
 /**
  * 🎤 GENERADOR DE PREDICAS IMPACTANTES + DEDICACIÓN DE ORACIONES
@@ -310,9 +311,12 @@ export function buildDatedSermon(opts: {
   seed: number;
   dateLabel?: string;
   prayerNames?: string;
+  avoid?: string[];
 }): VideoScript {
-  const { topic, durationSec, seed, dateLabel, prayerNames } = opts;
+  const { topic, durationSec, seed, dateLabel, prayerNames, avoid } = opts;
   const base = findSermon(topic, seed);
+  // Versículo/salmo SIEMPRE fresco: del banco amplio, evitando los recientes.
+  const scripture = pickScripture({ avoid });
 
   // Reunir puntos de varios sermones y barajarlos para máxima variedad.
   const allPoints = shuffle(
@@ -324,7 +328,7 @@ export function buildDatedSermon(opts: {
   if (dateLabel) parts.push(pick(DATE_OPENERS, seed)(dateLabel));
   parts.push(pick(HOOKS, seed + 3));
   parts.push(base.intro);
-  parts.push(`La Biblia dice en ${base.reference}: ${base.verse}`);
+  parts.push(`La Biblia dice en ${scripture.reference}: ${scripture.verse}`);
 
   const targetWords = Math.floor(durationSec * NARRATION_WPS);
   const countWords = () => parts.join(" ").split(/\s+/).length;
@@ -363,8 +367,8 @@ export function buildDatedSermon(opts: {
   parts.push(CLOSING_CTA);
 
   return {
-    verse: base.verse,
-    reference: base.reference,
+    verse: scripture.verse,
+    reference: scripture.reference,
     message: pick(CLIMAXES, seed + 11),
     fullText: parts.join(" "),
   };

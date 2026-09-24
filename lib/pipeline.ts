@@ -39,6 +39,7 @@ export async function runGenerationPipeline(
     contentStyle,
     prayerNames: req.prayerNames,
     sermonDate: req.sermonDate,
+    avoidReferences: req.avoidReferences,
     seed,
   });
 
