@@ -1,7 +1,7 @@
 import type { GenerateRequest, VideoProject } from "./types";
 import { generateScript } from "./ai/anthropic";
 import { generateVoice } from "./ai/voice";
-import { findBackground } from "./ai/pexels";
+import { findBackground, findSermonScenes } from "./ai/pexels";
 import { generateLipSync } from "./ai/did";
 import { uploadAudioDataUrl } from "./supabase/server";
 import { sermonScenes } from "./constants";
@@ -46,8 +46,13 @@ export async function runGenerationPipeline(
   // La voz lee el texto "humanizado": referencias como "6:17" se convierten
   // a "capítulo 6, versículo 17" para que NO las lea como una hora.
   const spokenText = humanizeForSpeech(script.fullText);
-  // En prédicas, los fondos cambian solos (escenas); si no, galería o Pexels.
-  const scenes = isSermon ? sermonScenes(seed) : undefined;
+  // En prédicas, los fondos cambian solos: intentamos fotos REALES frescas
+  // (Pixabay/Pexels/Unsplash) por fase; si fallan, usamos la galería incluida.
+  let scenes: { imageUrl: string; startPct: number }[] | undefined;
+  if (isSermon) {
+    const fresh = await findSermonScenes();
+    scenes = fresh.length >= 2 ? fresh : sermonScenes(seed);
+  }
   const useBundled = Boolean(req.bundledBackground) || isSermon;
   const [voice, background] = await Promise.all([
     generateVoice({
