@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { VIRAL_HOOKS, HASHTAG_SETS, type Platform } from "@/lib/marketing";
+import { anthropicKey } from "@/lib/ai/anthropic-config";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -20,10 +21,11 @@ export async function POST(req: NextRequest) {
   const topic = body.topic || "fe";
   const platform: Platform = body.platform || "tiktok";
 
-  if (process.env.ANTHROPIC_API_KEY) {
+  const apiKey = anthropicKey();
+  if (apiKey) {
     try {
       const { default: Anthropic } = await import("@anthropic-ai/sdk");
-      const client = new Anthropic();
+      const client = new Anthropic({ apiKey });
       const response = await client.messages.create({
         model: "claude-sonnet-5",
         max_tokens: 1024,

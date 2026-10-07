@@ -7,7 +7,7 @@
  */
 
 const KEY = "vqi-recent-refs";
-const MAX = 40; // recuerda las últimas 40 referencias
+const MAX = 120; // recuerda las últimas 120 referencias (casi todo el banco)
 
 /** Lee las referencias usadas recientemente (más nueva primero). */
 export function getRecentRefs(): string[] {

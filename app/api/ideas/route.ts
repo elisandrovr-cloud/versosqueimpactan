@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AGENTS, buildIdeaBatch, type ContentIdea } from "@/lib/ideas";
+import { anthropicKey } from "@/lib/ai/anthropic-config";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -20,10 +21,11 @@ export async function POST(req: NextRequest) {
   const count = Math.min(Math.max(body.count ?? 5, 1), 8);
   const exclude = body.exclude ?? [];
 
-  if (process.env.ANTHROPIC_API_KEY) {
+  const apiKey = anthropicKey();
+  if (apiKey) {
     try {
       const { default: Anthropic } = await import("@anthropic-ai/sdk");
-      const client = new Anthropic();
+      const client = new Anthropic({ apiKey });
       const agentList = AGENTS.map((a) => `- ${a.id} (${a.name}): ${a.focus}`).join("\n");
       const res = await client.messages.create({
         model: "claude-sonnet-5",

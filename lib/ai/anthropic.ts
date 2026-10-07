@@ -3,6 +3,7 @@ import type { ContentStyle, VideoScript } from "../types";
 import { NARRATION_WPS } from "../constants";
 import { buildDemoScript } from "../verse-bank";
 import { appendPrayer, buildDatedSermon, fillToTarget } from "../sermon-bank";
+import { anthropicKey } from "./anthropic-config";
 
 /**
  * Construye el guion SIN IA (banco curado). Rutea a sermón para "predica",
@@ -73,7 +74,8 @@ export async function generateScript(opts: {
   const style = opts.contentStyle ?? "versiculo";
   const avoid = opts.avoidReferences ?? [];
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  const apiKey = anthropicKey();
+  if (!apiKey) {
     return {
       script: buildLocalScript({
         topic,
@@ -91,7 +93,7 @@ export async function generateScript(opts: {
   }
 
   const targetWords = Math.floor(durationSec * NARRATION_WPS);
-  const client = new Anthropic();
+  const client = new Anthropic({ apiKey });
 
   const verseInstruction = manualVerse
     ? `El usuario eligió este versículo (úsalo TAL CUAL, no lo cambies): "${manualVerse}"${manualReference ? ` (${manualReference})` : ""}. Si falta la referencia, identifícala.`

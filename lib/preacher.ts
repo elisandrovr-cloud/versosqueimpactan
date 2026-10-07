@@ -106,8 +106,11 @@ export function preacherRect(position: string | undefined, W: number, H: number)
 
 interface Look {
   skin: string;
+  skinMid: string;
   skinShadow: string;
+  iris: string;
   hair: string;
+  hairLight: string;
   robe: string;
   robeLight: string;
   robeDark: string;
@@ -117,29 +120,38 @@ interface Look {
 
 const LOOKS: Record<string, Look> = {
   "pastor-joven": {
-    skin: "#e3ac81",
-    skinShadow: "#c98d63",
-    hair: "#3a2517",
+    skin: "#ecb78d",
+    skinMid: "#d89a6e",
+    skinShadow: "#b67e55",
+    iris: "#5b3a1e",
+    hair: "#2f1d12",
+    hairLight: "#4e3220",
     robe: "#4f4380",
-    robeLight: "#6a5ba3",
-    robeDark: "#342a5c",
+    robeLight: "#6f60ab",
+    robeDark: "#322850",
   },
   "pastor-mayor": {
-    skin: "#e0b291",
-    skinShadow: "#c4906c",
-    hair: "#d6d6d6",
+    skin: "#e8bd98",
+    skinMid: "#d4a079",
+    skinShadow: "#b9875f",
+    iris: "#6a4a2e",
+    hair: "#dadada",
+    hairLight: "#f2f2f2",
     robe: "#5f4235",
-    robeLight: "#7d5947",
-    robeDark: "#432f26",
+    robeLight: "#82604c",
+    robeDark: "#402d23",
     beard: "#dcdcdc",
   },
   pastora: {
-    skin: "#ebbc96",
-    skinShadow: "#d09a72",
-    hair: "#4a2e1c",
+    skin: "#efc29d",
+    skinMid: "#dca77f",
+    skinShadow: "#c08a62",
+    iris: "#4a2e1c",
+    hair: "#3f2616",
+    hairLight: "#643c22",
     robe: "#7d3251",
-    robeLight: "#9d4269",
-    robeDark: "#5c2340",
+    robeLight: "#a4466e",
+    robeDark: "#59213d",
     longHair: true,
   },
 };
@@ -164,22 +176,37 @@ export function preacherSvg(id: string, mouthOpen: boolean): string {
     : "";
 
   const mouth = mouthOpen
-    ? `<ellipse cx="${cx}" cy="206" rx="21" ry="17" fill="#6e2626"/>
-       <ellipse cx="${cx}" cy="214" rx="13" ry="8" fill="#c05a5a"/>
-       <path d="M160 195 Q180 189 200 195 L196 199 Q180 195 164 199 Z" fill="#fff"/>`
-    : `<path d="M158 203 Q180 217 202 203" stroke="#8a3b3b" stroke-width="6" fill="none" stroke-linecap="round"/>
-       <path d="M164 209 Q180 214 196 209" stroke="#00000022" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+    ? `<ellipse cx="${cx}" cy="207" rx="20" ry="15" fill="#6e2626"/>
+       <ellipse cx="${cx}" cy="214" rx="12" ry="7" fill="#b85656"/>
+       <path d="M162 196 Q180 190 198 196 L194 200 Q180 196 166 200 Z" fill="#fbfbf5"/>
+       <path d="M160 196 Q180 204 200 196" stroke="#5a1e1e" stroke-width="2" fill="none" opacity="0.5"/>`
+    : `<path d="M157 203 Q180 215 203 203" stroke="#7d4a3a" stroke-width="5" fill="none" stroke-linecap="round"/>
+       <path d="M163 207 Q180 213 197 207" stroke="#00000022" stroke-width="3" fill="none" stroke-linecap="round"/>
+       <path d="M157 203 Q180 199 203 203" stroke="${l.skinShadow}" stroke-width="2.5" fill="none" opacity="0.6"/>`;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="360" height="460" viewBox="0 0 360 460">
   <defs>
-    <radialGradient id="skin${uid}" cx="42%" cy="38%" r="70%">
+    <radialGradient id="skin${uid}" cx="40%" cy="34%" r="75%">
       <stop offset="0%" stop-color="${l.skin}"/>
+      <stop offset="60%" stop-color="${l.skinMid}"/>
       <stop offset="100%" stop-color="${l.skinShadow}"/>
     </radialGradient>
     <linearGradient id="robe${uid}" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="${l.robeLight}"/>
       <stop offset="55%" stop-color="${l.robe}"/>
       <stop offset="100%" stop-color="${l.robeDark}"/>
+    </linearGradient>
+    <radialGradient id="cheek${uid}" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#e2887a" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#e2887a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="hi${uid}" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="iris${uid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${l.iris}"/>
+      <stop offset="100%" stop-color="#1e140c"/>
     </linearGradient>
   </defs>
 
@@ -188,6 +215,8 @@ export function preacherSvg(id: string, mouthOpen: boolean): string {
   <path d="M180 280 Q150 380 150 460 L210 460 Q210 380 180 280 Z" fill="#000" opacity="0.14"/>
   <path d="M108 330 Q96 400 104 460" stroke="#000" stroke-width="6" opacity="0.10" fill="none"/>
   <path d="M252 330 Q264 400 256 460" stroke="#000" stroke-width="6" opacity="0.10" fill="none"/>
+  <!-- Luz de borde en los hombros -->
+  <path d="M70 450 Q90 300 180 283" stroke="#ffffff" stroke-width="3" opacity="0.10" fill="none"/>
   <!-- Estola pastoral -->
   <path d="M150 288 L136 460 L118 460 L133 292 Z" fill="#e8c24a"/>
   <path d="M210 288 L224 460 L242 460 L227 292 Z" fill="#e8c24a"/>
@@ -211,39 +240,53 @@ export function preacherSvg(id: string, mouthOpen: boolean): string {
   <rect x="${cx - 5}" y="286" width="10" height="40" rx="2" fill="#f0d060"/>
   <rect x="${cx - 15}" y="298" width="30" height="9" rx="2" fill="#f0d060"/>
 
-  <!-- Cuello -->
+  <!-- Cuello + sombra bajo el mentón -->
   <rect x="${cx - 22}" y="238" width="44" height="52" rx="16" fill="url(#skin${uid})"/>
-  <path d="M158 250 Q180 268 202 250 L202 244 Q180 258 158 244 Z" fill="#000" opacity="0.12"/>
+  <path d="M150 248 Q180 272 210 248 L210 240 Q180 262 150 240 Z" fill="#000" opacity="0.16"/>
   ${longHair}
 
   <!-- Cabeza -->
-  <circle cx="${cx}" cy="168" r="88" fill="url(#skin${uid})"/>
+  <path d="M94 170 Q94 76 180 76 Q266 76 266 170 Q266 236 214 256 Q180 266 146 256 Q94 236 94 170 Z" fill="url(#skin${uid})"/>
+  <!-- Sombra lateral (volumen) -->
+  <path d="M232 110 Q266 150 262 196 Q252 236 214 254 Q244 214 244 168 Q244 132 232 110 Z" fill="#000" opacity="0.10"/>
+  <!-- Luz en la frente/pómulo -->
+  <ellipse cx="150" cy="135" rx="40" ry="46" fill="url(#hi${uid})"/>
   <!-- Orejas -->
-  <circle cx="94" cy="174" r="14" fill="url(#skin${uid})"/>
-  <circle cx="266" cy="174" r="14" fill="url(#skin${uid})"/>
+  <ellipse cx="96" cy="176" rx="13" ry="17" fill="url(#skin${uid})"/>
+  <ellipse cx="264" cy="176" rx="13" ry="17" fill="url(#skin${uid})"/>
+  <path d="M94 170 Q100 176 96 184" stroke="${l.skinShadow}" stroke-width="2" fill="none" opacity="0.6"/>
   <!-- Cabello -->
-  <path d="M94 152 Q98 70 180 70 Q262 70 266 152 Q252 106 180 104 Q108 106 94 152 Z" fill="${l.hair}"/>
-  <path d="M94 152 Q120 118 180 116 Q240 118 266 152 Q252 130 180 128 Q108 130 94 152 Z" fill="#fff" opacity="0.08"/>
+  <path d="M90 158 Q92 66 180 66 Q268 66 270 158 Q254 104 180 102 Q106 104 90 158 Z" fill="${l.hair}"/>
+  <path d="M104 120 Q150 86 200 96 Q160 92 120 116 Q108 120 104 120 Z" fill="${l.hairLight}" opacity="0.7"/>
+  <path d="M90 158 Q120 118 180 116 Q240 118 270 158 Q250 134 180 132 Q110 134 90 158 Z" fill="#fff" opacity="0.06"/>
   ${beard}
 
   <!-- Cejas (serias, emotivas) -->
-  <path d="M126 140 Q146 132 164 140" stroke="${l.hair}" stroke-width="8" fill="none" stroke-linecap="round"/>
-  <path d="M196 140 Q214 132 234 140" stroke="${l.hair}" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <path d="M126 142 Q146 133 165 141" stroke="${l.hair}" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <path d="M195 141 Q214 133 234 142" stroke="${l.hair}" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <!-- Cuencas (sombra suave) -->
+  <ellipse cx="146" cy="162" rx="17" ry="13" fill="${l.skinShadow}" opacity="0.25"/>
+  <ellipse cx="214" cy="162" rx="17" ry="13" fill="${l.skinShadow}" opacity="0.25"/>
   <!-- Ojos -->
-  <ellipse cx="146" cy="160" rx="13" ry="10" fill="#fff"/>
-  <ellipse cx="214" cy="160" rx="13" ry="10" fill="#fff"/>
-  <circle cx="148" cy="161" r="6.5" fill="#3a2a1e"/>
-  <circle cx="216" cy="161" r="6.5" fill="#3a2a1e"/>
-  <circle cx="150" cy="158" r="2.2" fill="#fff"/>
-  <circle cx="218" cy="158" r="2.2" fill="#fff"/>
-  <!-- Párpados (mirada cálida) -->
-  <path d="M133 153 Q146 148 159 153" stroke="${l.skinShadow}" stroke-width="2.5" fill="none"/>
-  <path d="M201 153 Q214 148 227 153" stroke="${l.skinShadow}" stroke-width="2.5" fill="none"/>
-  <!-- Nariz -->
-  <path d="M180 164 Q172 186 172 190 Q180 197 188 190 Q188 186 180 164 Z" fill="${l.skinShadow}" opacity="0.55"/>
-  <!-- Mejillas -->
-  <ellipse cx="126" cy="190" rx="13" ry="9" fill="#e2887a" opacity="0.3"/>
-  <ellipse cx="234" cy="190" rx="13" ry="9" fill="#e2887a" opacity="0.3"/>
+  <ellipse cx="146" cy="162" rx="14" ry="9.5" fill="#fbfbf7"/>
+  <ellipse cx="214" cy="162" rx="14" ry="9.5" fill="#fbfbf7"/>
+  <circle cx="148" cy="162" r="7" fill="url(#iris${uid})"/>
+  <circle cx="216" cy="162" r="7" fill="url(#iris${uid})"/>
+  <circle cx="148" cy="162" r="3" fill="#120b06"/>
+  <circle cx="216" cy="162" r="3" fill="#120b06"/>
+  <circle cx="150.5" cy="159" r="2" fill="#fff"/>
+  <circle cx="218.5" cy="159" r="2" fill="#fff"/>
+  <!-- Párpado superior (línea de pestañas) -->
+  <path d="M132 158 Q146 150 160 157" stroke="#2a1b10" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M200 157 Q214 150 228 158" stroke="#2a1b10" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Nariz (puente + fosas) -->
+  <path d="M180 150 Q176 172 170 188 Q180 196 190 188 Q184 172 180 150 Z" fill="${l.skinShadow}" opacity="0.35"/>
+  <path d="M172 150 Q174 170 170 186" stroke="#ffffff" stroke-width="2" fill="none" opacity="0.18"/>
+  <ellipse cx="172" cy="189" rx="2.6" ry="2" fill="#000" opacity="0.28"/>
+  <ellipse cx="188" cy="189" rx="2.6" ry="2" fill="#000" opacity="0.28"/>
+  <!-- Mejillas (rubor suave) -->
+  <ellipse cx="126" cy="190" rx="16" ry="11" fill="url(#cheek${uid})"/>
+  <ellipse cx="234" cy="190" rx="16" ry="11" fill="url(#cheek${uid})"/>
   <!-- Boca -->
   ${mouth}
 </svg>`;
