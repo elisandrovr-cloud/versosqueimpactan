@@ -11,6 +11,7 @@ import {
   Factory,
   Rocket,
   Mic,
+  Link2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ const links = [
   { href: "/", label: "Inicio", icon: BookOpenText },
   { href: "/sala", label: "Sala diaria", icon: Sparkles },
   { href: "/publicar", label: "Publicar", icon: Rocket },
+  { href: "/conectar", label: "Conectar redes", icon: Link2 },
   { href: "/estudio", label: "Fábrica", icon: Factory },
   { href: "/generador", label: "Generador", icon: Clapperboard },
   { href: "/predica", label: "Prédicas", icon: Mic },
