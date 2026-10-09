@@ -3,6 +3,7 @@ import type { ContentStyle, VideoScript } from "../types";
 import { NARRATION_WPS } from "../constants";
 import { buildDemoScript } from "../verse-bank";
 import { appendPrayer, buildDatedSermon, fillToTarget } from "../sermon-bank";
+import { buildInspiration } from "../inspiration-bank";
 import { anthropicKey } from "./anthropic-config";
 
 /**
@@ -21,8 +22,13 @@ function buildLocalScript(opts: {
   prayerNames?: string;
   sermonDate?: string;
   avoid?: string[];
+  inspire?: boolean;
 }): VideoScript {
-  const { topic, durationSec, seed, manualVerse, manualReference, style, prayerNames, sermonDate, avoid } = opts;
+  const { topic, durationSec, seed, manualVerse, manualReference, style, prayerNames, sermonDate, avoid, inspire } = opts;
+  // Modo inspiración: micro-mensaje emotivo con versículo fresco.
+  if (inspire && !manualVerse) {
+    return buildInspiration({ durationSec, seed: seed ?? Date.now(), avoid });
+  }
   if (style === "predica") {
     // Prédica larga consciente de la fecha (contenido distinto cada vez).
     return buildDatedSermon({
@@ -68,9 +74,10 @@ export async function generateScript(opts: {
   prayerNames?: string;
   sermonDate?: string;
   avoidReferences?: string[];
+  inspire?: boolean;
   seed?: number;
 }): Promise<{ script: VideoScript; demo: boolean }> {
-  const { topic, customMessage, manualVerse, manualReference, durationSec, prayerNames, sermonDate } = opts;
+  const { topic, customMessage, manualVerse, manualReference, durationSec, prayerNames, sermonDate, inspire } = opts;
   const style = opts.contentStyle ?? "versiculo";
   const avoid = opts.avoidReferences ?? [];
 
@@ -87,6 +94,7 @@ export async function generateScript(opts: {
         prayerNames,
         sermonDate,
         avoid,
+        inspire,
       }),
       demo: true,
     };
@@ -126,6 +134,16 @@ ${sermonDate ? `- COMIENZA de forma natural mencionando la fecha, por ejemplo: "
 - Termina SIEMPRE con: "Comenta abajo si quieres que oremos por ti o por alguien más. ¡Dios te bendiga!"`,
   }[style];
 
+  // Modo inspiración: micro-mensaje emotivo y breve que CONECTE con la persona.
+  const inspireInstructions = `ESTILO: MENSAJE INSPIRADOR BREVE (video de ${durationSec} segundos, muy corto).
+- Habla DIRECTO al corazón de quien mira, de "tú", como si Dios le hablara en este momento.
+- Estructura: un gancho cálido de 1 frase + el versículo + un cierre esperanzador de 1 frase.
+- POCAS palabras que toquen el alma (NO superes ${targetWords} palabras en total). Cálido, emotivo, íntimo.
+- Evita clichés y frases religiosas vacías; que se sienta real y personal.
+- En "message" pon la frase de cierre; en "fullText" el mensaje completo narrado.`;
+
+  const effectiveInstructions = inspire ? inspireInstructions : styleInstructions;
+
   const prayerInstruction =
     prayerNames?.trim() && style !== "predica"
       ? `\nDEDICACIÓN: Incluye cerca del final una oración dedicada por: ${prayerNames}. Y termina con "Comenta abajo si quieres que oremos por ti o por alguien más. ¡Dios te bendiga!"`
@@ -144,7 +162,7 @@ ${verseInstruction}${avoidInstruction}
 
 DURACIÓN DEL VIDEO: ${durationSec} segundos → el guion narrado completo debe tener aproximadamente ${targetWords} palabras (ritmo pausado y emotivo). NO te pases de ${targetWords + 8} palabras.
 
-${styleInstructions}${prayerInstruction}
+${effectiveInstructions}${prayerInstruction}
 
 Responde SOLO con JSON válido (sin markdown):
 {"verse": "texto del versículo", "reference": "Libro 0:0", "message": "la reflexión o clímax", "fullText": "guion narrado completo"}`;
@@ -179,6 +197,7 @@ Responde SOLO con JSON válido (sin markdown):
         prayerNames,
         sermonDate,
         avoid,
+        inspire,
       }),
       demo: true,
     };
