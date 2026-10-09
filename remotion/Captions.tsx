@@ -31,10 +31,13 @@ export const Captions: React.FC<{
     [wordTimings, captionMode]
   );
 
-  const page = activePage(pages, t);
+  const page = captionMode === "revelado" ? pages[0] : activePage(pages, t);
   if (!page) return null;
 
   const fontSize = captionFontSize(page, captionMode, minDim);
+
+  const isRevelado = captionMode === "revelado";
+  const isParagraph = captionMode === "parrafo" || isRevelado;
 
   const pageStartFrame = Math.round((page.start - 0.15) * fps);
   const enter = spring({
@@ -42,14 +45,18 @@ export const Captions: React.FC<{
     fps,
     config: { damping: 200, stiffness: 120 },
   });
-  const exitOpacity = interpolate(
-    t,
-    [page.end + 0.15, page.end + 0.35],
-    [1, 0],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-  );
+  // El revelado NO se desvanece al terminar las palabras: queda hasta el fade
+  // final del video (para leer el versículo completo).
+  const exitOpacity = isRevelado
+    ? 1
+    : interpolate(t, [page.end + 0.15, page.end + 0.35], [1, 0], {
+        extrapolateLeft: "clamp",
+        extrapolateRight: "clamp",
+      });
 
-  const isParagraph = captionMode === "parrafo";
+  // El bloque completo solo se desliza en modos no-revelado (en revelado cada
+  // palabra entra por su cuenta).
+  const blockEnter = isRevelado ? 1 : enter;
 
   return (
     <div
@@ -58,12 +65,12 @@ export const Captions: React.FC<{
         left: 0,
         right: 0,
         ...(isParagraph
-          ? { top: "50%", transform: `translateY(-50%) translateY(${(1 - enter) * 30}px) scale(${0.94 + enter * 0.06})` }
-          : { top: "38%", transform: `translateY(${(1 - enter) * 30}px) scale(${0.94 + enter * 0.06})` }),
+          ? { top: "50%", transform: `translateY(-50%) translateY(${(1 - blockEnter) * 30}px) scale(${0.94 + blockEnter * 0.06})` }
+          : { top: "38%", transform: `translateY(${(1 - blockEnter) * 30}px) scale(${0.94 + blockEnter * 0.06})` }),
         display: "flex",
         justifyContent: "center",
         padding: "0 8%",
-        opacity: enter * exitOpacity,
+        opacity: blockEnter * exitOpacity,
       }}
     >
       <p
@@ -81,6 +88,31 @@ export const Captions: React.FC<{
         }}
       >
         {page.words.map((w, i) => {
+          // 🔤 REVELADO: cada palabra aparece (fade + sube) en su tiempo y se
+          // queda; las que aún no llegan quedan invisibles pero reservan su
+          // espacio, así el párrafo completo se va "escribiendo".
+          if (isRevelado) {
+            const appear = interpolate(t, [w.start, w.start + 0.28], [0, 1], {
+              extrapolateLeft: "clamp",
+              extrapolateRight: "clamp",
+            });
+            const justIn = t >= w.start && t < w.start + 0.4;
+            return (
+              <span
+                key={i}
+                style={{
+                  display: "inline-block",
+                  margin: "0 0.14em",
+                  color: justIn ? style.highlightColor : "#ffffff",
+                  opacity: appear,
+                  transform: `translateY(${(1 - appear) * 12}px)`,
+                }}
+              >
+                {w.word}
+              </span>
+            );
+          }
+
           const active = t >= w.start && t <= w.end + 0.08;
           const spoken = t > w.end;
           const pop = active

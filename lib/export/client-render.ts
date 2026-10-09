@@ -348,14 +348,19 @@ function drawFrame(
     ctx.globalAlpha = 1;
   }
 
-  // ---- Subtítulos karaoke (misma lógica que la vista previa) ----
+  // ---- Subtítulos (misma lógica que la vista previa) ----
   const pages = getPages(project.assets.wordTimings, mode);
-  const page = activePage(pages, t);
+  const isRevelado = mode === "revelado";
+  const page = isRevelado ? pages[0] : activePage(pages, t);
   if (page) {
     const style = getTextStyle(project.textStyle);
     const fs = captionFontSize(page, mode, Math.min(W, H));
-    const enter = Math.min(Math.max((t - (page.start - 0.15)) / 0.25, 0), 1);
-    const exit = t > page.end + 0.15 ? Math.max(1 - (t - page.end - 0.15) / 0.2, 0) : 1;
+    const enter = isRevelado ? 1 : Math.min(Math.max((t - (page.start - 0.15)) / 0.25, 0), 1);
+    const exit = isRevelado
+      ? 1
+      : t > page.end + 0.15
+        ? Math.max(1 - (t - page.end - 0.15) / 0.2, 0)
+        : 1;
     ctx.globalAlpha = enter * exit;
     ctx.font = `${style.fontWeight} ${fs}px ${style.fontFamily}`;
     ctx.textAlign = "left";
@@ -381,7 +386,7 @@ function drawFrame(
     });
 
     const blockH = lines.length * lineH;
-    const centerY = mode === "parrafo" ? H * 0.5 : H * 0.42;
+    const centerY = mode === "palabras" ? H * 0.42 : H * 0.5;
     let y = centerY - blockH / 2 + lineH * 0.8 + (1 - enter) * 30 * s;
 
     ctx.shadowColor = "rgba(0,0,0,0.85)";
@@ -396,10 +401,23 @@ function drawFrame(
       for (const item of line) {
         const w = item.word;
         const idx = page.words.indexOf(w);
+        const txt = style.textTransform === "uppercase" ? w.word.toUpperCase() : w.word;
+
+        // 🔤 REVELADO: cada palabra aparece (fade + sube) en su tiempo y se queda.
+        if (isRevelado) {
+          const appear = Math.min(Math.max((t - w.start) / 0.28, 0), 1);
+          if (appear <= 0) continue; // aún no entra
+          const justIn = t >= w.start && t < w.start + 0.4;
+          ctx.globalAlpha = appear;
+          ctx.fillStyle = justIn ? style.highlightColor : "#ffffff";
+          ctx.fillText(txt, startX + item.x, y + (1 - appear) * 12 * s);
+          ctx.globalAlpha = 1;
+          continue;
+        }
+
         const active = t >= w.start && t <= w.end + 0.08;
         const spoken = t > w.end;
         ctx.fillStyle = active || spoken ? style.highlightColor : "rgba(255,255,255,0.86)";
-        const txt = style.textTransform === "uppercase" ? w.word.toUpperCase() : w.word;
         const pop = active ? 1 + Math.sin(Math.min((t - w.start) / 0.18, 1) * Math.PI) * 0.07 : 1;
         if (pop !== 1) {
           ctx.save();

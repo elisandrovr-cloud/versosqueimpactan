@@ -59,7 +59,19 @@ export function paginateSentences(timings: WordTiming[]): CaptionPage[] {
 }
 
 export function getPages(timings: WordTiming[], mode: CaptionMode): CaptionPage[] {
-  return mode === "parrafo" ? paginateSentences(timings) : paginateWords(timings);
+  if (mode === "parrafo") return paginateSentences(timings);
+  // "revelado": TODO el texto en una sola página (párrafo que se va revelando).
+  if (mode === "revelado") {
+    if (timings.length === 0) return [];
+    return [
+      {
+        words: timings,
+        start: timings[0].start,
+        end: timings[timings.length - 1].end,
+      },
+    ];
+  }
+  return paginateWords(timings);
 }
 
 /**
@@ -74,6 +86,7 @@ export function captionFontSize(
 ): number {
   const scale = minDim / 1080;
   if (mode === "palabras") return 84 * scale;
+  // "parrafo" y "revelado" se ajustan según la cantidad de texto.
   const chars = page.words.reduce((a, w) => a + w.word.length + 1, 0);
   if (chars <= 60) return 72 * scale;
   if (chars <= 110) return 60 * scale;

@@ -27,7 +27,9 @@ export async function runGenerationPipeline(
 
   // Modo prédica larga: fuerza estilo sermón y fondos que cambian solos.
   const isSermon = req.mode === "predica";
-  const contentStyle = isSermon ? "predica" : req.contentStyle;
+  // Modo inspiración: versículo corto (10–15s), fondo de naturaleza, revelado.
+  const isInspiracion = req.mode === "inspiracion";
+  const contentStyle = isSermon ? "predica" : isInspiracion ? "versiculo" : req.contentStyle;
 
   // 1. 🖋️ Agente Guionista
   const { script } = await generateScript({
@@ -98,11 +100,12 @@ export async function runGenerationPipeline(
       : bg.imageUrl;
 
   // La duración final se ajusta al audio real + respiro de cierre.
-  // Prédicas: hasta ~10 min (620s). Cortos: hasta ~3 min (190s).
-  const durationCap = isSermon ? 620 : 190;
+  // Prédicas: hasta ~10 min (620s). Inspiración: 10–18s. Cortos: hasta ~3 min.
+  const durationCap = isSermon ? 620 : isInspiracion ? 18 : 190;
+  const durationFloor = isInspiracion ? 10 : 15;
   const durationSec = voice.demo
     ? req.durationSec
-    : Math.min(Math.max(voice.audioDurationSec + 1.5, 15), durationCap);
+    : Math.min(Math.max(voice.audioDurationSec + 1.2, durationFloor), durationCap);
 
   return {
     id,

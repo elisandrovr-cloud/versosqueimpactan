@@ -23,11 +23,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Prédicas: 5–10 min. Cortos: 15s–3 min.
+  // Prédicas: 5–10 min. Inspiración: 10–18s. Cortos: 15s–3 min.
   const isSermon = body.mode === "predica";
+  const isInspiracion = body.mode === "inspiracion";
   const durationSec = isSermon
     ? Math.min(Math.max(Number(body.durationSec) || SERMON_MIN, SERMON_MIN), SERMON_MAX)
-    : Math.min(Math.max(Number(body.durationSec) || 30, MIN_DURATION), MAX_DURATION);
+    : isInspiracion
+      ? Math.min(Math.max(Number(body.durationSec) || 12, 10), 18)
+      : Math.min(Math.max(Number(body.durationSec) || 30, MIN_DURATION), MAX_DURATION);
 
   try {
     const project = await runGenerationPipeline({ ...body, durationSec });

@@ -33,10 +33,10 @@ export type ContentStyle = "versiculo" | "historia" | "confrontacion" | "predica
 export type AspectId = "9:16" | "1:1" | "16:9";
 
 /** Cómo se muestran los subtítulos. */
-export type CaptionMode = "palabras" | "parrafo";
+export type CaptionMode = "palabras" | "parrafo" | "revelado";
 
-/** Modo de generación: video corto (15s–90s) o prédica larga (5–10 min). */
-export type GenerationMode = "corto" | "predica";
+/** Modo de generación: video corto, prédica larga o versículo inspirador. */
+export type GenerationMode = "corto" | "predica" | "inspiracion";
 
 /**
  * Una escena de fondo dentro de la línea de tiempo. `startPct` es el punto
