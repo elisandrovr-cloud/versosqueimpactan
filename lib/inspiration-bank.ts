@@ -9,38 +9,54 @@ import { pickScripture, targetWordsFor } from "./scripture-bank";
  * breve, emotivo, como si Dios le hablara al corazón en ese instante.
  */
 
-/** Ganchos de apertura que detienen el scroll y tocan el corazón. */
+/** Ganchos cortos y directos que detienen el scroll. */
 const OPENERS = [
-  "Si hoy sientes que ya no puedes más, escucha esto:",
-  "No fue casualidad que vieras esto. Dios quiere hablarte:",
-  "Para ese corazón cansado, hoy Dios dice:",
-  "Respira. Este mensaje es para ti, justo hoy:",
-  "Aunque nadie lo note, Dios ve tu lucha, y te dice:",
-  "Hoy el cielo tiene una palabra para ti:",
-  "Cuando todo parezca oscuro, recuerda esto:",
-  "Dios no te ha olvidado. Escucha su promesa:",
-  "Detente un momento y recíbelo en tu corazón:",
-  "Lo que estás viviendo no es el final. Dios dice:",
-  "Si nadie te lo ha dicho hoy, escúchalo de Dios:",
-  "En medio de tu tormenta, Él te susurra:",
-  "Quizás llegaste aquí roto. Dios te dice:",
-  "Antes de seguir, deja que esto llegue a tu alma:",
+  "Escucha esto.",
+  "Para ti, hoy.",
+  "No estás solo.",
+  "Dios te ve.",
+  "Respira y cree.",
+  "Esto es para ti.",
+  "Dios te habla.",
+  "Levanta la mirada.",
+  "No te rindas.",
+  "Hoy, escucha a Dios.",
+  "Detente un momento.",
+  "Dios no te olvidó.",
+  "Créelo hoy.",
+  "Recíbelo en tu corazón.",
 ];
 
-/** Cierres cálidos y esperanzadores que invitan a confiar. */
+/** Reflexión breve que aplica el versículo y da un poco más de cuerpo. */
+const REFLECTIONS = [
+  "Deja que estas palabras calmen tu corazón.",
+  "Hoy Dios te recuerda que no caminas solo.",
+  "Lo que sientes ahora no define tu final.",
+  "Él conoce tu nombre y también tu dolor.",
+  "Permite que esta verdad te sostenga hoy.",
+  "Dios está obrando incluso en lo que no ves.",
+  "Tu quebranto no es el final de tu historia.",
+  "Hay esperanza, y empieza en este momento.",
+  "Él convierte tus lágrimas en fortaleza.",
+  "Dios cuida de cada detalle de tu vida.",
+  "Nada de lo que vives toma a Dios por sorpresa.",
+  "Aun en la espera, Él está contigo.",
+];
+
+/** Cierres cortos, cálidos y esperanzadores. */
 const CLOSERS = [
-  "Dios está contigo. No tengas miedo.",
-  "No estás solo: Él pelea por ti.",
-  "Confía: lo mejor aún está por venir.",
-  "Hoy puedes descansar en sus brazos.",
-  "Su amor por ti nunca se acaba.",
-  "Déjalo todo en sus manos; Él se encarga.",
-  "Eres amado más de lo que imaginas.",
-  "Levanta la mirada: Dios tiene el control.",
-  "Tu historia no termina aquí.",
-  "Recíbelo por fe. Él es fiel.",
-  "Aférrate a esa promesa hoy.",
-  "Dios te bendice, hoy y siempre.",
+  "Él está contigo.",
+  "Confía en Él.",
+  "Dios es fiel.",
+  "Descansa en Él.",
+  "Eres amado.",
+  "Él te sostiene.",
+  "No temas más.",
+  "Él nunca falla.",
+  "Hoy y siempre.",
+  "Aférrate a esto.",
+  "Dios te bendice.",
+  "Cree y descansa.",
 ];
 
 function pick<T>(arr: T[], seed: number): T {
@@ -48,9 +64,10 @@ function pick<T>(arr: T[], seed: number): T {
 }
 
 /**
- * Construye un mensaje inspirador breve con un versículo fresco (sin repetir).
- * Se ajusta a la duración (10–15s): si no cabe todo, recorta el cierre o el
- * gancho, priorizando que el versículo siempre esté presente.
+ * Construye un mensaje inspirador con un versículo fresco (sin repetir):
+ * gancho corto + versículo + reflexión breve + cierre corto. Un poco más de
+ * cuerpo que antes, pero sin perder la fuerza. Recorta solo si se excede mucho,
+ * priorizando siempre el versículo y la reflexión.
  */
 export function buildInspiration(opts: {
   durationSec: number;
@@ -60,21 +77,24 @@ export function buildInspiration(opts: {
   const { durationSec, seed, avoid } = opts;
   const scripture = pickScripture({ avoid });
   const opener = pick(OPENERS, seed);
+  const reflection = pick(REFLECTIONS, seed + 5);
   const closer = pick(CLOSERS, seed + 7);
 
-  const budget = targetWordsFor(durationSec); // ~21 (10s) a ~31 (15s)
+  // Margen generoso para que el texto sea un poco más largo que el versículo solo.
+  const budget = targetWordsFor(durationSec) + 10;
   const count = (parts: string[]) => parts.join(" ").split(/\s+/).length;
 
-  // Preferencia: gancho + versículo + cierre. Si no cabe, se va recortando.
-  let parts = [opener, scripture.verse, closer];
-  if (count(parts) > budget) parts = [opener, scripture.verse];
-  if (count(parts) > budget) parts = [scripture.verse, closer];
+  // Preferencia: gancho + versículo + reflexión + cierre.
+  let parts = [opener, scripture.verse, reflection, closer];
+  if (count(parts) > budget) parts = [opener, scripture.verse, reflection];
+  if (count(parts) > budget) parts = [scripture.verse, reflection];
   if (count(parts) > budget) parts = [scripture.verse];
 
   return {
     verse: scripture.verse,
     reference: scripture.reference,
-    message: closer,
+    message: reflection,
     fullText: parts.join(" "),
   };
 }
+

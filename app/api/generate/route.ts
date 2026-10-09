@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
   const durationSec = isSermon
     ? Math.min(Math.max(Number(body.durationSec) || SERMON_MIN, SERMON_MIN), SERMON_MAX)
     : isInspiracion
-      ? Math.min(Math.max(Number(body.durationSec) || 12, 10), 18)
+      ? Math.min(Math.max(Number(body.durationSec) || 12, 10), 24)
       : Math.min(Math.max(Number(body.durationSec) || 30, MIN_DURATION), MAX_DURATION);
 
   try {

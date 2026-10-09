@@ -134,13 +134,12 @@ ${sermonDate ? `- COMIENZA de forma natural mencionando la fecha, por ejemplo: "
 - Termina SIEMPRE con: "Comenta abajo si quieres que oremos por ti o por alguien más. ¡Dios te bendiga!"`,
   }[style];
 
-  // Modo inspiración: micro-mensaje emotivo y breve que CONECTE con la persona.
-  const inspireInstructions = `ESTILO: MENSAJE INSPIRADOR BREVE (video de ${durationSec} segundos, muy corto).
-- Habla DIRECTO al corazón de quien mira, de "tú", como si Dios le hablara en este momento.
-- Estructura: un gancho cálido de 1 frase + el versículo + un cierre esperanzador de 1 frase.
-- POCAS palabras que toquen el alma (NO superes ${targetWords} palabras en total). Cálido, emotivo, íntimo.
-- Evita clichés y frases religiosas vacías; que se sienta real y personal.
-- En "message" pon la frase de cierre; en "fullText" el mensaje completo narrado.`;
+  // Modo inspiración: mensaje emotivo que CONECTE, con gancho y cierre CORTOS.
+  const inspireInstructions = `ESTILO: MENSAJE INSPIRADOR (video corto de ${durationSec} segundos).
+- Habla DIRECTO al corazón de quien mira, de "tú", como si Dios le hablara ahora.
+- Estructura: un GANCHO muy corto y directo (2 a 4 palabras, ej. "Escucha esto." / "No estás solo.") + el versículo + una reflexión breve que lo aplique a su vida + un CIERRE muy corto (2 a 4 palabras, ej. "Confía en Él." / "Dios es fiel.").
+- Palabras que toquen el alma, cálidas y reales (evita clichés). Hasta ${targetWords + 10} palabras en total.
+- En "message" pon la reflexión; en "fullText" el mensaje completo narrado.`;
 
   const effectiveInstructions = inspire ? inspireInstructions : styleInstructions;
 

@@ -102,8 +102,8 @@ export async function runGenerationPipeline(
 
   // La duración final se ajusta al audio real + respiro de cierre.
   // Prédicas: hasta ~10 min (620s). Inspiración: 10–18s. Cortos: hasta ~3 min.
-  const durationCap = isSermon ? 620 : isInspiracion ? 18 : 190;
-  const durationFloor = isInspiracion ? 10 : 15;
+  const durationCap = isSermon ? 620 : isInspiracion ? 24 : 190;
+  const durationFloor = isInspiracion ? 11 : 15;
   const durationSec = voice.demo
     ? req.durationSec
     : Math.min(Math.max(voice.audioDurationSec + 1.2, durationFloor), durationCap);
